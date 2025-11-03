@@ -7,6 +7,7 @@ annotated-types==0.7.0
 attrs==25.4.0
 certifi==2025.10.5
 frozenlist==1.8.0
+greenlet==3.2.4
 idna==3.11
 magic-filter==1.0.12
 multidict==6.7.0
@@ -14,6 +15,7 @@ propcache==0.4.1
 pydantic==2.11.10
 pydantic_core==2.33.2
 python-dotenv==1.2.1
+SQLAlchemy==2.0.44
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 yarl==1.22.0

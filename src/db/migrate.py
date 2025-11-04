@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from sys import stdout
 from src.db import Base, engine
-from src.db.schema import *
+from src.db.schemas import *
 
 
 def main() -> None:

@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Income",
+        "income": true
+    },
+    {
+        "name": "Groceries",
+        "income": false
+    },
+    {
+        "name": "Transportation",
+        "income": false
+    },
+    {
+        "name": "Entertainment",
+        "income": false
+    },
+    {
+        "name": "Shopping",
+        "income": false
+    },
+    {
+        "name": "Gifts",
+        "income": false
+    },
+    {
+        "name": "Bills & Fees",
+        "income": false
+    },
+    {
+        "name": "Healthcare",
+        "income": false
+    },
+    {
+        "name": "Travel",
+        "income": false
+    },
+    {
+        "name": "Other expenses",
+        "income": false
+    }
+]

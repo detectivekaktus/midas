@@ -20,11 +20,14 @@ class Event(Base):
     interval:               int not null
     next_run_at:            timestamp (without tz) not null
     """
+
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    transaction_type_id: Mapped[int] = mapped_column(ForeignKey("transaction_types.id"), nullable=False)
+    transaction_type_id: Mapped[int] = mapped_column(
+        ForeignKey("transaction_types.id"), nullable=False
+    )
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(256), nullable=False)
     amount: Mapped[float] = mapped_column(DOUBLE_PRECISION, nullable=False)
@@ -37,4 +40,3 @@ class Event(Base):
 
     def __repr__(self) -> str:
         return f"Event({self.id=!r}, {self.user_id=!r}, {self.transaction_type_id=!r}, {self.title=!r}, {self.description=!r}, {self.amount=!r}, {self.last_run_at=!r}, {self.interval=!r}, {self.next_run_at=!r})"
-    

@@ -22,6 +22,7 @@ class Currency(Base):
     | United States Dollar | USD  | $      |
     ```
     """
+
     __tablename__ = "currencies"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -35,4 +36,6 @@ class Currency(Base):
     users = relationship("User", back_populates="currency")
 
     def __repr__(self) -> str:
-        return f"Currency({self.id=!r}, {self.name=!r}, {self.code=!r}, {self.symbol=!r})"
+        return (
+            f"Currency({self.id=!r}, {self.name=!r}, {self.code=!r}, {self.symbol=!r})"
+        )

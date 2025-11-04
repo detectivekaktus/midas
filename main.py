@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 def main() -> None:
     assert 0, "No Telegram bot implementation is done."
 

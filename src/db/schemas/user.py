@@ -13,10 +13,13 @@ class User(Base):
     id:             int primary key
     currency_id:    int not null
     """
+
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    currency_id: Mapped[int] = mapped_column(ForeignKey("currencies.id"), nullable=False)
+    currency_id: Mapped[int] = mapped_column(
+        ForeignKey("currencies.id"), nullable=False
+    )
 
     currency = relationship("Currency", back_populates="users")
     accounts = relationship("Account", back_populates="user")

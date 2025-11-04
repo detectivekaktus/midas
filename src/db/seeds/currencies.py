@@ -20,4 +20,5 @@ def seed() -> None:
         session.add_all(currencies)
         session.commit()
 
+
 TABLENAME = "currencies"

@@ -15,6 +15,7 @@ class Storage(Base):
     account_id: int foreign key not null
     amount:     double precision not null
     """
+
     __tablename__ = "storages"
 
     id: Mapped[int] = mapped_column(primary_key=True)

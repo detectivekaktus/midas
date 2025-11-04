@@ -18,4 +18,5 @@ def seed() -> None:
         session.add_all(types)
         session.commit()
 
+
 TABLENAME = "transaction_types"

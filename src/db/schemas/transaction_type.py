@@ -22,6 +22,7 @@ class TransactionType(Base):
     | Income       | true      |
     ```
     """
+
     __tablename__ = "transaction_types"
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -15,13 +15,16 @@ class Goal(Base):
     current_amount: double precision default 0 not null
     total_amount:   double precision not null
     """
+
     __tablename__ = "goals"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(256))
-    current_amount: Mapped[float] = mapped_column(DOUBLE_PRECISION, default=0, nullable=False)
+    current_amount: Mapped[float] = mapped_column(
+        DOUBLE_PRECISION, default=0, nullable=False
+    )
     total_amount: Mapped[float] = mapped_column(DOUBLE_PRECISION, nullable=False)
 
     user = relationship("User", back_populates="goals")

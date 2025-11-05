@@ -14,9 +14,12 @@ def truncate_table(tablename: str) -> None:
     Args:
         tablename (str): SQL table name.
     """
-    con = engine.connect()
-    con.execute(text(f"TRUNCATE TABLE {tablename} RESTART IDENTITY CASCADE"))
-    con.commit()
+    with engine.connect() as con:
+        if not tablename.isidentifier():
+            raise ValueError(f"Invalid table name: {tablename}")
+
+        con.execute(text(f"TRUNCATE TABLE {tablename} RESTART IDENTITY CASCADE"))
+        con.commit()
 
 
 def main() -> None:

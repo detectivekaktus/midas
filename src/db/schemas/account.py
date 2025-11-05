@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sqlalchemy import DOUBLE_PRECISION, ForeignKey
+from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
 
@@ -20,10 +20,10 @@ class Account(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     debit_amount: Mapped[float] = mapped_column(
-        DOUBLE_PRECISION, default=0, nullable=False
+        Numeric(12, 2), default=0, nullable=False
     )
     credit_amount: Mapped[float] = mapped_column(
-        DOUBLE_PRECISION, default=0, nullable=False
+        Numeric(12, 2), default=0, nullable=False
     )
 
     user = relationship("User", back_populates="accounts")

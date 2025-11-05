@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from datetime import datetime, timezone
-from sqlalchemy import DOUBLE_PRECISION, TIMESTAMP, ForeignKey, String, Uuid
+from typing import Optional
+from uuid import uuid4
+from sqlalchemy import TIMESTAMP, ForeignKey, Numeric, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
 
@@ -35,23 +36,23 @@ class Transaction(Base):
 
     __tablename__ = "transactions"
 
-    id: Mapped[Uuid] = mapped_column(Uuid, primary_key=True)
+    id: Mapped[Uuid] = mapped_column(Uuid, default=uuid4, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     transaction_type_id: Mapped[int] = mapped_column(
         ForeignKey("transaction_types.id"), nullable=False
     )
     created_at = mapped_column(
-        TIMESTAMP(timezone=False),
-        default=lambda: datetime.now(timezone.utc),
+        TIMESTAMP(timezone=True),
+        server_default=func.now(),
         nullable=False,
     )
     title: Mapped[str] = mapped_column(String(64), nullable=False)
-    description: Mapped[str] = mapped_column(String(256))
-    amount: Mapped[float] = mapped_column(DOUBLE_PRECISION, nullable=False)
+    description: Mapped[str] = mapped_column(String(256), nullable=True)
+    amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     debit_account_id: Mapped[int] = mapped_column(
         ForeignKey("accounts.id"), nullable=False
     )
-    credit_account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"))
+    credit_account_id: Mapped[Optional[int]] = mapped_column(ForeignKey("accounts.id"))
 
     user = relationship("User", back_populates="transactions")
     transaction_type = relationship("TransactionType", back_populates="transactions")

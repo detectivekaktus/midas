@@ -9,14 +9,12 @@ def seed() -> None:
     with open("src/db/seeds/data/currencies.json", "r") as f:
         content = f.read()
         seed_currencies: list[dict[str, str]] = loads(content)
-        print(seed_currencies)
 
     with Session(engine) as session:
         currencies = [
             Currency(name=cur["name"], code=cur["code"], symbol=cur["symbol"])
             for cur in seed_currencies
         ]
-        print(currencies)
         session.add_all(currencies)
         session.commit()
 

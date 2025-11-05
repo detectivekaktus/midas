@@ -7,6 +7,6 @@ from pathlib import Path
 # Path(__file__).parent is src/db/schema
 package_dir = Path(__file__).parent
 
-for file in listdir(str(package_dir)):
-    if not file.startswith("__"):
-        import_module(f"{__name__}.{file[:-3]}")
+for file in package_dir.iterdir():
+    if file.is_file() and file.name.endswith(".py") and not file.name.startswith("__"):
+        import_module(f"{__name__}.{file.stem}")

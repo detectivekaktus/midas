@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sqlalchemy import DOUBLE_PRECISION, ForeignKey
+from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
 
@@ -21,7 +21,7 @@ class Storage(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False)
-    amount: Mapped[float] = mapped_column(DOUBLE_PRECISION, nullable=False)
+    amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
 
     user = relationship("User", back_populates="storages")
     account = relationship("Account", back_populates="storage")

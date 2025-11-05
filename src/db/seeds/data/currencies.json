@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Euro",
+        "code": "EUR",
+        "symbol": "€"
+    },
+    {
+        "name": "United States Dollar",
+        "code": "USD",
+        "symbol": "$"
+    },
+    {
+        "name": "Ukrainian Hryvnia",
+        "code": "UAH",
+        "symbol": "₴"
+    },
+    {
+        "name": "Bitcoin",
+        "code": "BTC",
+        "symbol": "BTC"
+    },
+    {
+        "name": "Ethereum",
+        "code": "ETH",
+        "symbol": "ETH"
+    }
+]

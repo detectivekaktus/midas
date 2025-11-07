@@ -5,30 +5,43 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "cron"
-      cronjob: "0 8 * * 5"
-      timezone: "Europe/Rome"
-    groups:
-      all-updates:
-        applies-to: version-updates
-        patterns:
-          - "*"
-    commit-message:
-      prefix: "chore(deps)"
+    - package-ecosystem: "pip" # See documentation for possible values
+      directory: "/" # Location of package manifests
+      schedule:
+          interval: "cron"
+          cronjob: "0 8 * * 5"
+          timezone: "Europe/Rome"
+      groups:
+          all-updates:
+              applies-to: version-updates
+              patterns:
+                  - "*"
+      commit-message:
+          prefix: "chore(deps)"
+      allow:
+          # These are so called top-level dependencies. With the `allow`
+          # option specified dependabot will ignore all the packages that
+          # aren't listed here and will update the ignored packages only
+          # when the top-level once update their dependencies.
+          #
+          # Refer to #4 to understand this decision.
+          - dependency-name: "aiogram"
+          - dependency-name: "alembic"
+          - dependency-name: "SQLAlchemy"
+          - dependency-name: "black"
+          - dependency-name: "psycopg2-binary"
+          - dependency-name: "python-dotenv"
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "cron"
-      cronjob: "0 8 * * 5"
-      timezone: "Europe/Rome"
-    groups:
-      all-updates:
-        applies-to: version-updates
-        patterns:
-          - "*"
-    commit-message:
-      prefix: "chore(github)"
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+          interval: "cron"
+          cronjob: "0 8 * * 5"
+          timezone: "Europe/Rome"
+      groups:
+          all-updates:
+              applies-to: version-updates
+              patterns:
+                  - "*"
+      commit-message:
+          prefix: "chore(github)"

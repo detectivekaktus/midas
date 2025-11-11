@@ -1,6 +1,7 @@
 from typing import Iterable, Optional, Self
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
+
 from src.db import Base, engine
 
 

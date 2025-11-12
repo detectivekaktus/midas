@@ -65,9 +65,15 @@ class Repository[T: Base, ID]:
 
     def flush(self) -> None:
         """
-        Triggers SQLAlchemy session flush
+        Trigger SQLAlchemy session flush
         """
         self.session.flush()
+
+    def commit(self) -> None:
+        """
+        Commit changes to the database
+        """
+        self.session.commit()
 
     def add(self, value: T) -> None:
         """

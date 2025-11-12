@@ -15,7 +15,7 @@ class Event(Base):
     transaction_type_id:    int foreign key not null
     title:                  varchar(64) not null
     description:            varchar(256)
-    amount:                 double precision not null
+    amount:                 Numeric(12, 2) not null
     last_run_at:            timestamp (without tz) not null
     interval:               int not null
     next_run_at:            timestamp (without tz) not null

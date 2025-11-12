@@ -29,7 +29,7 @@ class Transaction(Base):
     created_at:             timestamp (without tz) default now not null
     title:                  varchar(64) not null
     description:            varchar(256)
-    amount:                 double precision not null
+    amount:                 Numeric(12, 2) not null
     debit_account_id:       int foreign key not null
     credit_account_id:      int foreign key not null
     """

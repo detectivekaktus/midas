@@ -11,14 +11,15 @@ class Account(Base):
 
     id:             serial primary key
     user_id:        int foreign key not null
-    debit_amount:   double precision not null default 0
-    credit_amount:  double precision not null default 0
+    debit_amount:   Numeric(12, 2) not null default 0
+    credit_amount:  Numeric(12, 2) not null default 0
     """
 
     __tablename__ = "accounts"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    transaction_type_id: Mapped[int] = mapped_column(ForeignKey("transaction_types.id"), nullable=False)
     debit_amount: Mapped[float] = mapped_column(
         Numeric(12, 2), default=0, nullable=False
     )
@@ -38,6 +39,7 @@ class Account(Base):
         back_populates="credit_account",
     )
     storage = relationship("Storage", back_populates="account")
+    transaction_type = relationship("TransactionType", back_populates="accounts")
 
     def __repr__(self) -> str:
         return f"Account({self.id=!r}, {self.user_id=!r}, {self.debit_amount=!r}, {self.credit_amount=!r})"

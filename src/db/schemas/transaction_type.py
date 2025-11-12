@@ -29,6 +29,7 @@ class TransactionType(Base):
     name: Mapped[str] = mapped_column(String(32), nullable=False)
     income: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
+    accounts = relationship("Account", back_populates="transaction_type")
     transactions = relationship("Transaction", back_populates="transaction_type")
     events = relationship("Event", back_populates="transaction_type")
 

@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, StrEnum
 
 
 class Currency(IntEnum):
@@ -14,6 +14,21 @@ class Currency(IntEnum):
     UAH = 3
     BTC = 4
     ETH = 5
+
+
+class StrCurrency(StrEnum):
+    """
+    Currency string enum. Each element corrisponds to the `code`
+    column inside `currencies` table.
+
+    Note that in case of adding more seed values you must update
+    this enumeration.
+    """
+    EUR = "EUR"
+    USD = "USD"
+    UAH = "UAH"
+    BTC = "BTC"
+    ETH = "ETH"
 
 
 class TransactionType(IntEnum):

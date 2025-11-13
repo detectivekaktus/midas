@@ -57,7 +57,7 @@ class RegisterUserUsecase(AbstractUsecase):
             if user is not None:
                 raise KeyError("User already exists")
 
-            user = User(id=user_id, currency_id=currency.value)
+            user = User(id=user_id, currency_id=currency)
             self.user_repo.add(user)
 
         income_account_id = None

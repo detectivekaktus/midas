@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import Optional
+from sqlalchemy.orm import Session
 
 
 class AbstractUsecase(ABC):
@@ -17,6 +19,16 @@ class AbstractUsecase(ABC):
     >>> usecase = RegisterUserUsecase(repo)
     >>> usecase.execute()
     """
+
+    def __init__(self, session: Optional[Session] = None) -> None:
+        """
+        Initialize a new Usecase object.
+
+        Note that `session` argument is here only for testing
+        purposes and must be left blank when this class is used
+        in production.
+        """
+        ...
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> None:

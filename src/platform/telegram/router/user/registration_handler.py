@@ -34,10 +34,7 @@ async def handle_registation_currency(
 ) -> None:
     await state.clear()
 
-    user_repo = Repository[User, int](User)
-    account_repo = Repository[Account, int](Account)
-    storage_repo = Repository[Storage, int](Storage)
-    usecase = RegisterUserUsecase(user_repo, account_repo, storage_repo)
+    usecase = RegisterUserUsecase()
 
     try:
         if not message.from_user:

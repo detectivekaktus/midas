@@ -1,7 +1,5 @@
-from typing import cast
 from aiogram.types import Message
 
-from src.platform.telegram.util.currency import get_currency_list
 from src.util.enums import Currency
 
 
@@ -15,12 +13,12 @@ def validate_currency(text: str) -> Currency:
 
     :raise ValueError: if text is not an element of the list.
     """
-    currencies = get_currency_list()
-    if text not in currencies:
-        raise ValueError(f"{text} is not a valid currency")
-
-    val = currencies.index(text) + 1
-    return cast(Currency, val)
+    try:
+        # "🇪🇺 EUR".split(" ")[1] = "EUR"
+        currency_code = text.split(" ")[1]
+        return Currency[currency_code]
+    except (IndexError, KeyError) as e:
+        raise ValueError(f"{text} is not a valid currency") from e
 
 
 def valid_currency_filter(message: Message) -> dict[str, Currency] | None:

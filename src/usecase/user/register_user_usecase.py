@@ -1,9 +1,11 @@
 from typing import override
 
+from sqlalchemy.orm import Session
+
+from src.query import Repository, create_session
 from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
-from src.query.repository import Repository
 from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import Currency, TransactionType
 
@@ -14,26 +16,18 @@ class RegisterUserUsecase(AbstractUsecase):
     operations for creating a new user, described more deeply in
     `execute()` method.
     """
-    
-    def __init__(
-        self,
-        user_repo: Repository[User, int],
-        account_repo: Repository[Account, int],
-        storage_repo: Repository[Storage, int],
-    ) -> None:
+
+    @override
+    def __init__(self, session: Session | None = None) -> None:
         """
         Initialize a new `RegisterUserUsecase` object.
 
-        :param user_repo: repository instance for adding a new user.
-        :type user_repo: Repository[User, int]
-        :param account_repo: repository instance for adding new accounts.
-        :type account_repo: Repository[Account, int]
-        :param storage_repo: repository instance for adding a new storage.
-        :type storage_repo: Repository[Storage, int]
+        See `AbstractUsecase` for more details.
         """
-        self.user_repo = user_repo
-        self.account_repo = account_repo
-        self.storage_repo = storage_repo
+        self._session = session or create_session()
+        self._user_repo = Repository[User, int](User, self._session)
+        self._account_repo = Repository[Account, int](Account, self._session)
+        self._storage_repo = Repository[Storage, int](Storage, self._session)
 
     @override
     def execute(self, user_id: int, currency: Currency) -> None:
@@ -52,31 +46,27 @@ class RegisterUserUsecase(AbstractUsecase):
 
         :raise KeyError: if user with `user_id` already exists.
         """
-        with self.user_repo:
-            user = self.user_repo.get_by_id(user_id)
+        with self._session:
+            user = self._user_repo.get_by_id(user_id)
             if user is not None:
                 raise KeyError("User already exists")
 
             user = User(id=user_id, currency_id=currency)
-            self.user_repo.add(user)
+            self._user_repo.add(user)
 
-        income_account_id = None
-        with self.account_repo:
             accounts = [
                 Account(user_id=user_id, transaction_type_id=type_id)
                 for type_id in TransactionType
             ]
+            self._account_repo.add_many(accounts)
+            self._account_repo.flush()
 
-            self.account_repo.add_many(accounts)
-            self.account_repo.flush()
-
-            income_account = [
+            income_account = next(
                 acc
                 for acc in accounts
                 if acc.transaction_type_id == TransactionType.INCOME
-            ][0]
-            income_account_id = income_account.id
+            )
+            storage = Storage(user_id=user_id, account_id=income_account.id)
+            self._storage_repo.add(storage)
 
-        with self.storage_repo:
-            storage = Storage(user_id=user_id, account_id=income_account_id)
-            self.storage_repo.add(storage)
+            self._session.commit()

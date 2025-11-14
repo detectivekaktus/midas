@@ -12,8 +12,8 @@ class Goal(Base):
     user_id:        int foreign key not null
     title:          varchar(64) not null
     description:    varchar(256)
-    current_amount: double precision default 0 not null
-    total_amount:   double precision not null
+    current_amount: Numeric(12, 2) default 0 not null
+    total_amount:   Numeric(12, 2) not null
     """
 
     __tablename__ = "goals"

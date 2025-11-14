@@ -1,9 +1,14 @@
-#!/usr/bin/env python3
+from asyncio import run
+from logging import INFO, basicConfig
+from sys import stdout
+
+from src.platform.telegram import start_bot
 
 
-def main() -> None:
-    assert 0, "No Telegram bot implementation is done."
+async def main() -> None:
+    basicConfig(level=INFO, stream=stdout)
+    await start_bot()
 
 
 if __name__ == "__main__":
-    main()
+    run(main())

@@ -13,7 +13,12 @@ _POSTGRES_DB: Optional[str] = getenv("POSTGRES_DB")
 _POSTGRES_HOST: Optional[str] = getenv("POSTGRES_HOST")
 _POSTGRES_PORT: Optional[str] = getenv("POSTGRES_PORT", "5432")
 
-if not all((_POSTGRES_USER, _POSTGRES_PASSWORD, _POSTGRES_DB, _POSTGRES_HOST)):
+_TESTING: Optional[str] = getenv("TESTING")
+
+if (
+    not all((_POSTGRES_USER, _POSTGRES_PASSWORD, _POSTGRES_DB, _POSTGRES_HOST))
+    and _TESTING != "1"
+):
     print(
         "FATAL: PostgreSQL is not set up correctly. At least one of (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB or POSTGRES_HOST) environmental variables is missing.",
         file=stderr,

@@ -32,6 +32,7 @@ updates:
       - dependency-name: "psycopg2-binary"
       - dependency-name: "python-dotenv"
       - dependency-name: "pytest"
+    target-branch: "dev"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -46,3 +47,4 @@ updates:
           - "*"
     commit-message:
       prefix: "chore(github)"
+    target-branch: "dev"

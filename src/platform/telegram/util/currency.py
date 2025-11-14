@@ -11,5 +11,11 @@ def get_currency_list() -> list[str]:
     :return: list of displayable currencies.
     :rtype: list[str]
     """
-    emojis = ["🇪🇺", "🇺🇸", "🇺🇦", "🌍", "🌏"]
-    return [f"{emoji} {currency}" for emoji, currency in zip(emojis, StrCurrency)]
+    currency_map = {
+        StrCurrency.EUR: "🇪🇺",
+        StrCurrency.USD: "🇺🇸",
+        StrCurrency.UAH: "🇺🇦",
+        StrCurrency.BTC: "🌍",
+        StrCurrency.ETH: "🌏"
+    }
+    return [f"{currency_map[currency]} {currency.value}" for currency in StrCurrency]

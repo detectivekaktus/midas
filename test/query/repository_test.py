@@ -1,5 +1,6 @@
 from pytest import fixture, raises
 
+from src.query.session import create_session
 from src.db.schemas.user import User
 from src.query.repository import Repository
 from src.util.enums import Currency
@@ -7,12 +8,13 @@ from src.util.enums import Currency
 
 @fixture
 def test_repo(test_engine) -> Repository:
-    repo = Repository[User, int](User, custom_engine=test_engine)
+    session = create_session(test_engine)
+    repo = Repository[User, int](User, session)
     return repo
 
 
 def test_add_one_and_get_it_back(test_repo):
-    with test_repo:
+    with test_repo._session:
         user = User(id=123456789, currency_id=Currency.EUR.value)
         test_repo.add(user)
 
@@ -25,7 +27,7 @@ def test_add_one_and_get_it_back(test_repo):
 
 
 def test_add_one_and_get_invalid(test_repo):
-    with test_repo:
+    with test_repo._session:
         user = User(id=123456789, currency_id=Currency.EUR.value)
         test_repo.add(user)
 
@@ -36,7 +38,7 @@ def test_add_one_and_get_invalid(test_repo):
 
 
 def test_add_many_and_get_first_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -53,7 +55,7 @@ def test_add_many_and_get_first_one(test_repo):
 
 
 def test_add_many_and_get_last_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -70,7 +72,7 @@ def test_add_many_and_get_last_one(test_repo):
 
 
 def test_add_many_and_get_all(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -79,14 +81,14 @@ def test_add_many_and_get_all(test_repo):
         ]
         test_repo.add_many(users)
 
-        for i, id in enumerate(range(123456786, 123456790, -1)):
-            fetched_user = test_repo.get_by_id(id)
-            assert fetched_user.id == users[i].id
-            assert fetched_user.currency_id == users[i].currency_id
+        for user in users:
+            fetched_user = test_repo.get_by_id(user.id)
+            assert fetched_user.id == user.id
+            assert fetched_user.currency_id == user.currency_id
 
 
 def test_add_one_and_update_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         user = User(id=123456789, currency_id=Currency.EUR.value)
         test_repo.add(user)
 
@@ -100,7 +102,7 @@ def test_add_one_and_update_one(test_repo):
 
 
 def test_add_many_and_update_first_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -119,7 +121,7 @@ def test_add_many_and_update_first_one(test_repo):
 
 
 def test_add_many_and_update_last_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -138,7 +140,7 @@ def test_add_many_and_update_last_one(test_repo):
 
 
 def test_add_one_and_delete_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         user = User(id=123456789, currency_id=Currency.EUR.value)
         test_repo.add(user)
 
@@ -151,7 +153,7 @@ def test_add_one_and_delete_one(test_repo):
 
 
 def test_add_one_and_delete_invalid_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         user = User(id=123456789, currency_id=Currency.EUR.value)
         test_repo.add(user)
 
@@ -160,7 +162,7 @@ def test_add_one_and_delete_invalid_one(test_repo):
 
 
 def test_add_many_and_delete_first_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -178,7 +180,7 @@ def test_add_many_and_delete_first_one(test_repo):
 
 
 def test_add_many_and_delete_last_one(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
@@ -196,7 +198,7 @@ def test_add_many_and_delete_last_one(test_repo):
 
 
 def test_add_many_and_delete_all(test_repo):
-    with test_repo:
+    with test_repo._session:
         users = [
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),

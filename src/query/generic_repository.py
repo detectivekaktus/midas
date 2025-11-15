@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from src.db import Base
 
 
-class Repository[T: Base, ID]:
+class GenericRepository[T: Base, ID]:
     """
     Repository class. This class is inspired by the clean architecture
     principles. The goal of this class is to abstract database queries

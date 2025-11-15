@@ -2,7 +2,9 @@ from typing import override
 
 from sqlalchemy.orm import Session
 
-from src.query import Repository, create_session
+from src.query import GenericRepository
+from src.query.account import AccountRepository
+from src.query.storage import StorageRepository
 from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
@@ -24,10 +26,10 @@ class RegisterUserUsecase(AbstractUsecase):
 
         See `AbstractUsecase` for more details.
         """
-        self._session = session or create_session()
-        self._user_repo = Repository[User, int](User, self._session)
-        self._account_repo = Repository[Account, int](Account, self._session)
-        self._storage_repo = Repository[Storage, int](Storage, self._session)
+        super().__init__(session)
+        self._user_repo = GenericRepository[User, int](User, self._session)
+        self._account_repo = AccountRepository(self._session)
+        self._storage_repo = StorageRepository(self._session)
 
     @override
     def execute(self, user_id: int, currency: Currency) -> None:

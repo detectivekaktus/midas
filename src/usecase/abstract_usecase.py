@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from sqlalchemy.orm import Session
 
+from src.query.session import create_session
+
 
 class AbstractUsecase(ABC):
     """
@@ -28,7 +30,7 @@ class AbstractUsecase(ABC):
         purposes and must be left blank when this class is used
         in production.
         """
-        ...
+        self._session = session or create_session()
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> None:

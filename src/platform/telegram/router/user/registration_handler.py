@@ -34,14 +34,14 @@ async def handle_registation_currency(
 ) -> None:
     await state.clear()
 
-    usecase = RegisterUserUsecase()
+    user = message.from_user
+    if not user:
+        return
 
     try:
-        if not message.from_user:
-            return
 
-        user_id = message.from_user.id
-        usecase.execute(user_id, currency)
+        usecase = RegisterUserUsecase()
+        usecase.execute(user.id, currency)
         await message.answer(
             "You've been successfully registered 🥳", reply_markup=ReplyKeyboardRemove()
         )

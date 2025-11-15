@@ -1,9 +1,9 @@
 from pytest import fixture, raises
 from sqlalchemy.orm import Session
 
-from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.query import GenericRepository
+from src.query.account import AccountRepository
 from src.db.schemas.user import User
 from src.usecase.user import RegisterUserUsecase
 from src.util.enums import Currency, TransactionType
@@ -23,7 +23,7 @@ def test_register_user(test_engine, test_usecase):
 
     session = Session(test_engine)
     user_repo = GenericRepository[User, int](User, session)
-    account_repo = GenericRepository[Account, int](Account, session)
+    account_repo = AccountRepository(session)
     storage_repo = GenericRepository[Storage, int](Storage, session)
 
     with session:

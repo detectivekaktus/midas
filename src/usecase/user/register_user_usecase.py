@@ -24,7 +24,7 @@ class RegisterUserUsecase(AbstractUsecase):
 
         See `AbstractUsecase` for more details.
         """
-        self._session = session or create_session()
+        super().__init__(session)
         self._user_repo = Repository[User, int](User, self._session)
         self._account_repo = Repository[Account, int](Account, self._session)
         self._storage_repo = Repository[Storage, int](Storage, self._session)

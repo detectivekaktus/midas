@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from src.query import GenericRepository
 from src.query.account import AccountRepository
+from src.query.storage import StorageRepository
 from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
@@ -28,7 +29,7 @@ class RegisterUserUsecase(AbstractUsecase):
         super().__init__(session)
         self._user_repo = GenericRepository[User, int](User, self._session)
         self._account_repo = AccountRepository(self._session)
-        self._storage_repo = GenericRepository[Storage, int](Storage, self._session)
+        self._storage_repo = StorageRepository(self._session)
 
     @override
     def execute(self, user_id: int, currency: Currency) -> None:

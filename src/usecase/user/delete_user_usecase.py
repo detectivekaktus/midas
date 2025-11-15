@@ -1,10 +1,10 @@
 from typing import override
 from sqlalchemy.orm import Session
 
-from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
 from src.query import GenericRepository
 from src.query.account import AccountRepository
+from src.query.storage import StorageRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 
 
@@ -19,7 +19,7 @@ class DeleteUserUsecase(AbstractUsecase):
         super().__init__(session)
         self._user_repo = GenericRepository[User, int](User, self._session)
         self._account_repo = AccountRepository(self._session)
-        self._storage_repo = GenericRepository[Storage, int](Storage, self._session)
+        self._storage_repo = StorageRepository(self._session)
 
     @override
     def execute(self, user_id: int) -> None:
@@ -43,11 +43,7 @@ class DeleteUserUsecase(AbstractUsecase):
             if user is None:
                 raise ValueError(f"No user with {user_id} exists")
             
-            storages: list[Storage] = user.storages
-            for storage in storages:
-                self._storage_repo.delete_by_id(storage.id)
-            self._storage_repo.flush()
-
+            self._storage_repo.delete_all_by_user_id(user_id)
             self._account_repo.delete_all_by_user_id(user_id)
-            self._user_repo.delete_by_id(user.id)
+            self._user_repo.delete_by_id(user_id)
             self._session.commit()

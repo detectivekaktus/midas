@@ -1,15 +1,14 @@
 from pytest import fixture, raises
 
-from src.query.session import create_session
 from src.db.schemas.user import User
-from src.query.repository import Repository
+from src.query import GenericRepository, create_session
 from src.util.enums import Currency
 
 
 @fixture
-def test_repo(test_engine) -> Repository:
+def test_repo(test_engine) -> GenericRepository:
     session = create_session(test_engine)
-    repo = Repository[User, int](User, session)
+    repo = GenericRepository[User, int](User, session)
     return repo
 
 

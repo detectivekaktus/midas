@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
-from src.query.repository import Repository
+from src.query import GenericRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 
 
@@ -17,9 +17,9 @@ class DeleteUserUsecase(AbstractUsecase):
     @override
     def __init__(self, session: Session | None = None) -> None:
         super().__init__(session)
-        self._user_repo = Repository[User, int](User, self._session)
-        self._account_repo = Repository[Account, int](Account, self._session)
-        self._storage_repo = Repository[Storage, int](Storage, self._session)
+        self._user_repo = GenericRepository[User, int](User, self._session)
+        self._account_repo = GenericRepository[Account, int](Account, self._session)
+        self._storage_repo = GenericRepository[Storage, int](Storage, self._session)
 
     @override
     def execute(self, user_id: int) -> None:

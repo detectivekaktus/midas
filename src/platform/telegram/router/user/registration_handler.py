@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from src.db.schemas.storage import Storage
 from src.db.schemas.account import Account
 from src.db.schemas.user import User
-from src.query import Repository
+from src.query import GenericRepository
 from src.util.enums import Currency
 from src.usecase.user import RegisterUserUsecase
 

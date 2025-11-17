@@ -29,7 +29,7 @@ updates:
       - dependency-name: "alembic"
       - dependency-name: "SQLAlchemy"
       - dependency-name: "black"
-      - dependency-name: "psycopg2-binary"
+      - dependency-name: "asyncpg"
       - dependency-name: "python-dotenv"
       - dependency-name: "pytest"
     target-branch: "dev"

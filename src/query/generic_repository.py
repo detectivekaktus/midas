@@ -1,5 +1,5 @@
 from typing import Iterable, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db import Base
 
@@ -21,12 +21,13 @@ class GenericRepository[T: Base, ID]:
     :example:
     >>> session = create_session()
     >>> repo = Repository[User, int](User, session)
-    >>> with session:
+    >>> async with session:
     >>>     user = User(name="detectivekaktus", email="artiomastashonak@gmail.com")
     >>>     repo.add(user)
+    >>>     await session.commit()
     """
 
-    def __init__(self, model: type[T], session: Session) -> None:
+    def __init__(self, model: type[T], session: AsyncSession) -> None:
         """
         Initialize the Repository class.
 
@@ -38,17 +39,17 @@ class GenericRepository[T: Base, ID]:
         self._model = model
         self._session = session
 
-    def flush(self) -> None:
+    async def flush(self) -> None:
         """
         Trigger SQLAlchemy session flush
         """
-        self._session.flush()
+        await self._session.flush()
 
-    def commit(self) -> None:
+    async def commit(self) -> None:
         """
         Commit changes to the database
         """
-        self._session.commit()
+        await self._session.commit()
 
     def add(self, value: T) -> None:
         """
@@ -68,7 +69,7 @@ class GenericRepository[T: Base, ID]:
         """
         self._session.add_all(values)
 
-    def get_by_id(self, id: ID) -> Optional[T]:
+    async def get_by_id(self, id: ID) -> Optional[T]:
         """
         Get a database entity by its primary key.
 
@@ -78,9 +79,9 @@ class GenericRepository[T: Base, ID]:
         exists with the provided id.
         :rtype: Optional[T]
         """
-        return self._session.get(self._model, id)
+        return await self._session.get(self._model, id)
 
-    def delete_by_id(self, id: ID) -> None:
+    async def delete_by_id(self, id: ID) -> None:
         """
         Delete a database entity by its primary key.
 
@@ -88,8 +89,8 @@ class GenericRepository[T: Base, ID]:
         :type id: ID
         :raise ValueError: if no entity with `id` exists.
         """
-        entity = self._session.get(self._model, id)
+        entity = await self._session.get(self._model, id)
         if not entity:
             raise ValueError(f"No entity with id {id} exists")
 
-        self._session.delete(entity)
+        await self._session.delete(entity)

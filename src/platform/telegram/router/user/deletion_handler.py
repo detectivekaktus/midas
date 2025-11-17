@@ -43,7 +43,7 @@ async def handle_yes_delete_profile_command(
 
     try:
         usecase = DeleteUserUsecase()
-        usecase.execute(user.id)
+        await usecase.execute(user.id)
         await message.answer(
             "Your profile has been deleted 😭", reply_markup=ReplyKeyboardRemove()
         )

@@ -1,13 +1,12 @@
 from typing import Optional
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 from src.db import engine
 
 
-def create_session(custom_engine: Optional[Engine] = None) -> Session:
+def create_session(custom_engine: Optional[AsyncEngine] = None) -> AsyncSession:
     """
-    Create sqlalchemy session.
+    Create async sqlalchemy session.
 
     This method obscures the sqlalchemy calls from the end
     user to provide a simpler interface for accessing session.
@@ -15,10 +14,10 @@ def create_session(custom_engine: Optional[Engine] = None) -> Session:
     Note that `custom_engine` argument is meant only for
     testing purposes and should remain `None` in production.
 
-    :param custom_engine: custom testing `Engine` object.
-    :type custom_engine: Engine
+    :param custom_engine: custom testing `AsyncEngine` object.
+    :type custom_engine: AsyncEngine
     :return: new sqlalchemy session
-    :rtype: Session
+    :rtype: AsyncSession
     """
-    session = Session(custom_engine or engine)
+    session = AsyncSession(custom_engine or engine)
     return session

@@ -1,5 +1,5 @@
-from pytest import fixture, raises
-from sqlalchemy.orm import Session
+from pytest import fixture, mark, raises
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.schemas.user import User
 from src.query import GenericRepository
@@ -10,56 +10,59 @@ from src.util.enums import Currency, TransactionType
 
 
 @fixture
-def test_register_usecase(test_engine):
-    session = Session(test_engine)
+def test_register_usecase(test_engine) -> RegisterUserUsecase:
+    session = AsyncSession(test_engine)
     usecase = RegisterUserUsecase(session=session)
     return usecase
 
 
 @fixture
-def test_delete_usecase(test_engine):
-    session = Session(test_engine)
+def test_delete_usecase(test_engine) -> DeleteUserUsecase:
+    session = AsyncSession(test_engine)
     usecase = DeleteUserUsecase(session=session)
     return usecase
 
 
-def test_register_user_and_delete_their_profile_and_data(
+@mark.asyncio
+async def test_register_user_and_delete_their_profile_and_data(
     test_engine, test_register_usecase, test_delete_usecase
 ):
     user_id = 123456789
     currency = Currency.EUR
-    test_register_usecase.execute(user_id, currency)
-    test_delete_usecase.execute(user_id)
+    await test_register_usecase.execute(user_id, currency)
+    await test_delete_usecase.execute(user_id)
 
-    session = Session(test_engine)
+    session = AsyncSession(test_engine)
     user_repo = GenericRepository[User, int](User, session)
     account_repo = AccountRepository(session)
     storage_repo = StorageRepository(session)
 
-    with session:
-        user = user_repo.get_by_id(user_id)
+    async with session:
+        user = await user_repo.get_by_id(user_id)
         assert user is None
 
         for i in TransactionType:
-            account = account_repo.get_by_id(i)
+            account = await account_repo.get_by_id(i)
             assert account is None
 
-        storage = storage_repo.get_by_id(1)
+        storage = await storage_repo.get_by_id(1)
         assert storage is None
 
 
-def test_register_user_and_double_delete_their_profile_and_data(
+@mark.asyncio
+async def test_register_user_and_double_delete_their_profile_and_data(
     test_register_usecase, test_delete_usecase
 ):
     user_id = 123456789
     currency = Currency.EUR
-    test_register_usecase.execute(user_id, currency)
-    test_delete_usecase.execute(user_id)
+    await test_register_usecase.execute(user_id, currency)
+    await test_delete_usecase.execute(user_id)
 
     with raises(ValueError):
-        test_delete_usecase.execute(user_id)
+        await test_delete_usecase.execute(user_id)
 
 
-def test_delete_invalid_user(test_delete_usecase):
+@mark.asyncio
+async def test_delete_invalid_user(test_delete_usecase):
     with raises(ValueError):
-        test_delete_usecase.execute(1)
+        await test_delete_usecase.execute(1)

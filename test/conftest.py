@@ -1,14 +1,14 @@
-from typing import Generator
-from pytest import fixture
-from sqlalchemy import Engine, create_engine
+from typing import AsyncGenerator
+from pytest_asyncio import fixture
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from src.db import Base
 
 
 @fixture
-def test_engine() -> Generator[Engine]:
-    engine = create_engine("sqlite://")
-    Base.metadata.create_all(engine)
-    yield engine
-    Base.metadata.drop_all(engine)
-
+async def test_engine() -> AsyncGenerator[AsyncEngine]:
+    engine = create_async_engine("sqlite+aiosqlite://")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        yield engine
+        await conn.run_sync(Base.metadata.drop_all)

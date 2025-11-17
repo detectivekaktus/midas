@@ -89,7 +89,7 @@ class GenericRepository[T: Base, ID]:
         :type id: ID
         :raise ValueError: if no entity with `id` exists.
         """
-        entity = self._session.get(self._model, id)
+        entity = await self._session.get(self._model, id)
         if not entity:
             raise ValueError(f"No entity with id {id} exists")
 

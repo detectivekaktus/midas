@@ -1,6 +1,6 @@
 from typing import override
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.query import GenericRepository
 from src.query.account import AccountRepository
@@ -20,7 +20,7 @@ class RegisterUserUsecase(AbstractUsecase):
     """
 
     @override
-    def __init__(self, session: Session | None = None) -> None:
+    def __init__(self, session: AsyncSession | None = None) -> None:
         """
         Initialize a new `RegisterUserUsecase` object.
 
@@ -32,7 +32,7 @@ class RegisterUserUsecase(AbstractUsecase):
         self._storage_repo = StorageRepository(self._session)
 
     @override
-    def execute(self, user_id: int, currency: Currency) -> None:
+    async def execute(self, user_id: int, currency: Currency) -> None:
         """
         Register a new user and data relative to them in the database.
 
@@ -48,7 +48,7 @@ class RegisterUserUsecase(AbstractUsecase):
 
         :raise KeyError: if user with `user_id` already exists.
         """
-        with self._session:
+        async with self._session:
             user = self._user_repo.get_by_id(user_id)
             if user is not None:
                 raise KeyError("User already exists")
@@ -61,7 +61,7 @@ class RegisterUserUsecase(AbstractUsecase):
                 for type_id in TransactionType
             ]
             self._account_repo.add_many(accounts)
-            self._account_repo.flush()
+            await self._account_repo.flush()
 
             income_account = next(
                 acc
@@ -71,4 +71,4 @@ class RegisterUserUsecase(AbstractUsecase):
             storage = Storage(user_id=user_id, account_id=income_account.id)
             self._storage_repo.add(storage)
 
-            self._session.commit()
+            await self._session.commit()

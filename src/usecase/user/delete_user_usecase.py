@@ -1,5 +1,5 @@
 from typing import override
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.schemas.user import User
 from src.query import GenericRepository
@@ -15,14 +15,14 @@ class DeleteUserUsecase(AbstractUsecase):
     """
 
     @override
-    def __init__(self, session: Session | None = None) -> None:
+    def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
         self._user_repo = GenericRepository[User, int](User, self._session)
         self._account_repo = AccountRepository(self._session)
         self._storage_repo = StorageRepository(self._session)
 
     @override
-    def execute(self, user_id: int) -> None:
+    async def execute(self, user_id: int) -> None:
         """
         Delete all user-generated content and their profile.
 
@@ -38,12 +38,12 @@ class DeleteUserUsecase(AbstractUsecase):
 
         :raise ValueError: if no user with the provided id exists.
         """
-        with self._session:
+        async with self._session:
             user = self._user_repo.get_by_id(user_id)
             if user is None:
                 raise ValueError(f"No user with {user_id} exists")
             
-            self._storage_repo.delete_all_by_user_id(user_id)
-            self._account_repo.delete_all_by_user_id(user_id)
-            self._user_repo.delete_by_id(user_id)
-            self._session.commit()
+            await self._storage_repo.delete_all_by_user_id(user_id)
+            await self._account_repo.delete_all_by_user_id(user_id)
+            await self._user_repo.delete_by_id(user_id)
+            await self._session.commit()

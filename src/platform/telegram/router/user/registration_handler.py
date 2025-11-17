@@ -3,10 +3,6 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-from src.db.schemas.storage import Storage
-from src.db.schemas.account import Account
-from src.db.schemas.user import User
-from src.query import GenericRepository
 from src.util.enums import Currency
 from src.usecase.user import RegisterUserUsecase
 
@@ -39,9 +35,8 @@ async def handle_registation_currency(
         return
 
     try:
-
         usecase = RegisterUserUsecase()
-        usecase.execute(user.id, currency)
+        await usecase.execute(user.id, currency)
         await message.answer(
             "You've been successfully registered 🥳", reply_markup=ReplyKeyboardRemove()
         )

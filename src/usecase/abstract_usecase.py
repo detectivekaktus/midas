@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.query.session import create_session
 
@@ -22,18 +22,21 @@ class AbstractUsecase(ABC):
     >>> usecase.execute()
     """
 
-    def __init__(self, session: Optional[Session] = None) -> None:
+    def __init__(self, session: Optional[AsyncSession] = None) -> None:
         """
         Initialize a new Usecase object.
 
         Note that `session` argument is here only for testing
         purposes and must be left blank when this class is used
         in production.
+
+        :param session: testing session.
+        :type session: Optional[AsyncSession]
         """
         self._session = session or create_session()
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> None:
+    async def execute(self, *args, **kwargs) -> None:
         """
         Execute the usecase business logic.
         """

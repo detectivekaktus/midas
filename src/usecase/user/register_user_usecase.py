@@ -49,7 +49,7 @@ class RegisterUserUsecase(AbstractUsecase):
         :raise KeyError: if user with `user_id` already exists.
         """
         async with self._session:
-            user = self._user_repo.get_by_id(user_id)
+            user = await self._user_repo.get_by_id(user_id)
             if user is not None:
                 raise KeyError("User already exists")
 

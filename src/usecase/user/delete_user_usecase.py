@@ -39,7 +39,7 @@ class DeleteUserUsecase(AbstractUsecase):
         :raise ValueError: if no user with the provided id exists.
         """
         async with self._session:
-            user = self._user_repo.get_by_id(user_id)
+            user = await self._user_repo.get_by_id(user_id)
             if user is None:
                 raise ValueError(f"No user with {user_id} exists")
             

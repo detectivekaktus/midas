@@ -30,8 +30,10 @@ updates:
       - dependency-name: "SQLAlchemy"
       - dependency-name: "black"
       - dependency-name: "asyncpg"
+      - dependency-name: "aiosqlite"
       - dependency-name: "python-dotenv"
       - dependency-name: "pytest"
+      - dependency-name: "pytest-asyncio"
     target-branch: "dev"
 
   - package-ecosystem: "github-actions"

@@ -5,6 +5,7 @@ aiohttp==3.12.15
 aiosignal==1.4.0
 alembic==1.17.1
 annotated-types==0.7.0
+asyncpg==0.30.0
 attrs==25.4.0
 black==25.11.0
 certifi==2025.10.5
@@ -23,7 +24,6 @@ pathspec==0.12.1
 platformdirs==4.5.0
 pluggy==1.6.0
 propcache==0.4.1
-psycopg2-binary==2.9.11
 pydantic==2.11.10
 pydantic_core==2.33.2
 Pygments==2.19.2

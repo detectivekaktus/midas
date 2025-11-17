@@ -28,7 +28,7 @@ if (
 
 # https://docs.sqlalchemy.org/en/20/tutorial/engine.html#tutorial-engine
 engine = create_engine(
-    f"postgresql+psycopg2://{_POSTGRES_USER}:{_POSTGRES_PASSWORD}@{_POSTGRES_HOST}:{_POSTGRES_PORT}/{_POSTGRES_DB}",
+    f"postgresql+asyncpg://{_POSTGRES_USER}:{_POSTGRES_PASSWORD}@{_POSTGRES_HOST}:{_POSTGRES_PORT}/{_POSTGRES_DB}",
     echo=getenv("SQLALCHEMY_ECHO", "False").lower() in ("true", "1"),
 )
 

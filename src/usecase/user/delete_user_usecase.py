@@ -8,7 +8,7 @@ from src.query.storage import StorageRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 
 
-class DeleteUserUsecase(AbstractUsecase):
+class DeleteUserUsecase(AbstractUsecase[None]):
     """
     Delete user usecase. This class deletes all user-generated
     data produced by the user as well as their profile.

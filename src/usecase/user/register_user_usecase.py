@@ -12,7 +12,7 @@ from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import Currency, TransactionType
 
 
-class RegisterUserUsecase(AbstractUsecase):
+class RegisterUserUsecase(AbstractUsecase[None]):
     """
     Register user usercase. This class performs all those necessary
     operations for creating a new user, described more deeply in

@@ -1,26 +1,19 @@
-from pytest import fixture, mark, raises
+from pytest import mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.query import GenericRepository
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
 from src.db.schemas.user import User
-from src.usecase.user import RegisterUserUsecase
 from src.util.enums import Currency, TransactionType
 
 
-@fixture
-def test_usecase(test_engine) -> RegisterUserUsecase:
-    session = AsyncSession(test_engine)
-    usecase = RegisterUserUsecase(session=session)
-    return usecase
-
 
 @mark.asyncio
-async def test_register_user(test_engine, test_usecase):
+async def test_register_user(test_engine, test_register_usecase):
     user_id = 123456789
     currency = Currency.EUR
-    await test_usecase.execute(user_id, currency)
+    await test_register_usecase.execute(user_id, currency)
 
     session = AsyncSession(test_engine)
     user_repo = GenericRepository[User, int](User, session)
@@ -50,10 +43,10 @@ async def test_register_user(test_engine, test_usecase):
 
 
 @mark.asyncio
-async def test_register_the_same_user_twice(test_usecase):
+async def test_register_the_same_user_twice(test_register_usecase):
     user_id = 123456789
     currency = Currency.EUR
-    await test_usecase.execute(user_id, currency)
+    await test_register_usecase.execute(user_id, currency)
 
     with raises(KeyError):
-        await test_usecase.execute(user_id, currency)
+        await test_register_usecase.execute(user_id, currency)

@@ -5,15 +5,8 @@ from src.db.schemas.user import User
 from src.query import GenericRepository
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
-from src.usecase.user import DeleteUserUsecase, RegisterUserUsecase
+from src.usecase.user import DeleteUserUsecase
 from src.util.enums import Currency, TransactionType
-
-
-@fixture
-def test_register_usecase(test_engine) -> RegisterUserUsecase:
-    session = AsyncSession(test_engine)
-    usecase = RegisterUserUsecase(session=session)
-    return usecase
 
 
 @fixture

@@ -16,7 +16,7 @@ class Transaction(Base):
     | Account name | Debit | Credit |
     +--------------+-------+--------+
     | Income       | X     |        |
-    | Income debit |       | X      |
+    | Income debt  |       | X      |
     ```
 
     Since it would be useless to keep the income debit account, income
@@ -26,12 +26,12 @@ class Transaction(Base):
     id:                     uuid primary key
     user_id:                int foreign key not null
     transaction_type_id:    int foreign key not null
-    created_at:             timestamp (without tz) default now not null
+    created_at:             timestamp default now not null
     title:                  varchar(64) not null
     description:            varchar(256)
     amount:                 Numeric(12, 2) not null
     debit_account_id:       int foreign key not null
-    credit_account_id:      int foreign key not null
+    credit_account_id:      int foreign key
     """
 
     __tablename__ = "transactions"

@@ -42,7 +42,7 @@ class AccountRepository(GenericRepository):
         :type user_id: int
         :param transaction_type: transaction type that's being tracked
         by the account
-        :return: user's account or `None`
+        :return: user's account or `None` if user doesn't exist
         :rtype: Optional[Account]
         """
         return (

@@ -22,6 +22,9 @@ class AuthMiddleware(BaseMiddleware):
         * unregistered user runs unallowed command.
         * registered user runs `/start` command.
     """
+    def __init__(self) -> None:
+        super().__init__()
+        self._usecase = GetUserUsecase()
 
     async def __call__(  # type: ignore
         self,
@@ -42,8 +45,7 @@ class AuthMiddleware(BaseMiddleware):
             warning("Auth middleware found an event without `.text` attribute. Denying...")
             return
 
-        usecase = GetUserUsecase()
-        user = await usecase.execute(telegram_user.id)
+        user = await self._usecase.execute(telegram_user.id)
         # If user is not registered and has sent a command and that command is not allowed.
         if user is None and (text.startswith('/') and (text not in AllowedCommand)):
             await event.answer(

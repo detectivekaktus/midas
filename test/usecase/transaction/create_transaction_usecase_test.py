@@ -1,11 +1,11 @@
+from decimal import Decimal
 from pytest import fixture, mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.schemas.storage import Storage
 from src.db.schemas.account import Account
-from src.db.schemas.transaction import Transaction
-from src.db.schemas.user import User
-from src.query import GenericRepository
+from src.query.user import UserRepository
+from src.query.transaction import TransactionRepository
 from src.usecase.transaction import CreateTransactionUsecase
 from src.util.enums import Currency, TransactionType
 
@@ -29,17 +29,19 @@ async def test_create_income_transaction_without_description(
         "user_id": user_id,
         "transaction_type": TransactionType.INCOME,
         "title": "Income transaction",
-        "amount": 100,
+        "amount": Decimal("100"),
     }
     await test_create_transaction.execute(**transaction_data)
 
     session = AsyncSession(test_engine)
-    user_repo = GenericRepository[User, int](User, session)
+    user_repo = UserRepository(session)
+    transaction_repo = TransactionRepository(session)
     async with session:
         user = await user_repo.get_by_id(user_id)
         assert user is not None
 
-        transaction: Transaction = user.transactions[0]
+        transactions = await transaction_repo.get_recent(user.id, eager=True)
+        transaction = transactions[0]
         assert transaction.user_id == transaction_data["user_id"]
         assert transaction.transaction_type_id == transaction_data["transaction_type"]
         assert transaction.title == transaction_data["title"]
@@ -69,18 +71,20 @@ async def test_create_income_transaction_with_description(
         "user_id": user_id,
         "transaction_type": TransactionType.INCOME,
         "title": "Income transaction",
-        "amount": 100,
+        "amount": Decimal("100"),
         "description": "Income transaction description",
     }
     await test_create_transaction.execute(**transaction_data)
 
     session = AsyncSession(test_engine)
-    user_repo = GenericRepository[User, int](User, session)
+    user_repo = UserRepository(session)
+    transaction_repo = TransactionRepository(session)
     async with session:
         user = await user_repo.get_by_id(user_id)
         assert user is not None
 
-        transaction: Transaction = user.transactions[0]
+        transactions = await transaction_repo.get_recent(user.id, eager=True)
+        transaction = transactions[0]
         assert transaction.user_id == transaction_data["user_id"]
         assert transaction.transaction_type_id == transaction_data["transaction_type"]
         assert transaction.title == transaction_data["title"]
@@ -112,65 +116,67 @@ async def test_create_multiple_transactions(
             "user_id": user_id,
             "transaction_type": TransactionType.INCOME,
             "title": "Income transaction",
-            "amount": 100,
+            "amount": Decimal("100"),
             "description": "Income transaction description",
         },
         {
             "user_id": user_id,
             "transaction_type": TransactionType.ENTERTAINMENT,
             "title": "Satisfactory",
-            "amount": 49.99,
+            "amount": Decimal("49.99"),
             "description": "Bought Satisfactory on steam",
         },
         {
             "user_id": user_id,
             "transaction_type": TransactionType.GROCERIES,
             "title": "Lidl groceries",
-            "amount": 150.46,
+            "amount": Decimal("150.46"),
             "description": "",
         },
         {
             "user_id": user_id,
             "transaction_type": TransactionType.BILLS_AND_FEES,
             "title": "Rent",
-            "amount": 400,
+            "amount": Decimal("400"),
             "description": "Paid my rent",
         },
     ]
 
-    storage_amount = 0
     for transaction in transactions:
         await test_create_transaction.execute(**transaction)
-        storage_amount += (
-            transaction["amount"]
-            if transaction["transaction_type"] == TransactionType.INCOME
-            else -transaction["amount"]
-        )
 
     session = AsyncSession(test_engine)
-    user_repo = GenericRepository[User, int](User, session)
+    user_repo = UserRepository(session)
+    transaction_repo = TransactionRepository(session)
     async with session:
-        user = await user_repo.get_by_id(user_id)
+        user = await user_repo.get_by_id(user_id, eager=True)
         assert user is not None
 
-        for i, transaction in enumerate(user.transactions):
+        income_account_amount = Decimal("0")
+        user_transactions = await transaction_repo.get_recent(user.id, eager=True)
+        for i, transaction in enumerate(user_transactions):
             assert transaction.user_id == transactions[i]["user_id"]
-            assert transaction.transaction_type_id == transactions[i]["transaction_type"]
+            assert (
+                transaction.transaction_type_id == transactions[i]["transaction_type"]
+            )
             assert transaction.title == transactions[i]["title"]
             assert transaction.amount == transactions[i]["amount"]
             assert transaction.description == transactions[i]["description"]
 
-            debit_account: Account = transaction.debit_account
-            assert debit_account is not None
-            assert debit_account.debit_amount == transactions[i]["amount"]
-
+            debit_account = transaction.debit_account
             credit_account = transaction.credit_account
             if transaction.transaction_type_id == TransactionType.INCOME:
+                income_account_amount += transaction.amount
+                
+                assert debit_account is not None
                 assert credit_account is None
             else:
+                income_account_amount -= transaction.amount
+                
+                assert debit_account is not None
+                assert debit_account.debit_amount == transactions[i]["amount"]
                 assert credit_account is not None
-                assert credit_account.credit_amount == transactions[i]["amount"]
 
         storage = user.storages[0]
         assert storage is not None
-        assert storage.ammount == storage_amount
+        assert storage.amount == income_account_amount

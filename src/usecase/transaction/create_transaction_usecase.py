@@ -1,14 +1,14 @@
+from decimal import Decimal
 from typing import Optional, override
-from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.schemas.storage import Storage
 from src.db.schemas.account import Account
-from src.db.schemas.user import User
 from src.db.schemas.transaction import Transaction
-from src.query import GenericRepository
-from src.query.storage import StorageRepository
 from src.query.account import AccountRepository
+from src.query.storage import StorageRepository
+from src.query.transaction import TransactionRepository
+from src.query.user import UserRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import TransactionType
 
@@ -23,10 +23,8 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
     @override
     def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
-        self._transaction_repo = GenericRepository[Transaction, UUID](
-            Transaction, self._session
-        )
-        self._user_repo = GenericRepository[User, int](User, self._session)
+        self._transaction_repo = TransactionRepository(self._session)
+        self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
         self._storage_repo = StorageRepository(self._session)
 
@@ -54,6 +52,8 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         :param description: transaction description
         :type description: Optional[str]
         """
+        converted_amount = Decimal(str(amount))
+
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
@@ -62,7 +62,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
             # this is guaranteed to be an account instance because user exists.
             income_account: Account = (
                 await self._account_repo.get_user_account_by_transaction_type(
-                    user.id, TransactionType.INCOME
+                    user.id, TransactionType.INCOME, eager=True
                 )
             )  # type: ignore
             if transaction_type == TransactionType.INCOME:
@@ -76,13 +76,13 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 # | Income      | amount |        |
                 # | Income debt |        | amount |
                 # +-------------+--------+--------+
-                debit_account.debit_amount += amount
-                storage.amount += amount
+                debit_account.debit_amount += converted_amount
+                storage.amount += converted_amount
             else:
                 # same here
                 debit_account: Account = (
                     await self._account_repo.get_user_account_by_transaction_type(
-                        user.id, transaction_type
+                        user.id, transaction_type, eager=True
                     )
                 ) # type: ignore
                 credit_account = income_account
@@ -94,16 +94,17 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 # | Expense     | amount |        |
                 # | Income      |        | amount |
                 # +-------------+--------+--------+
-                debit_account.debit_amount += amount
-                credit_account.credit_amount += amount
-                storage.amount -= amount
+
+                debit_account.debit_amount += converted_amount
+                credit_account.credit_amount += converted_amount
+                storage.amount -= converted_amount
 
             transaction = Transaction(
                 user_id=user_id,
                 transaction_type_id=transaction_type,
                 title=title,
                 description=description,
-                amount=amount,
+                amount=converted_amount,
                 debit_account_id=debit_account.id,
                 credit_account_id=credit_account.id if credit_account is not None else None
             )

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from decimal import Decimal
 from sqlalchemy import ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
@@ -22,10 +23,10 @@ class Goal(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(256), nullable=True)
-    current_amount: Mapped[float] = mapped_column(
+    current_amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=0, nullable=False
     )
-    total_amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
 
     user = relationship("User", back_populates="goals")
 

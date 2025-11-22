@@ -48,7 +48,10 @@ class UserRepository(GenericRepository[User, int], EagerLoadable[User, int]):
                 await self._session.scalars(
                     select(User)
                     .where(User.id == id)
-                    .options(selectinload(User.accounts, User.storages))
+                    .options(
+                        selectinload(User.accounts),
+                        selectinload(User.storages)
+                    )
                 )
             ).one_or_none()
 

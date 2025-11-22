@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from decimal import Decimal
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
@@ -20,10 +21,10 @@ class Account(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     transaction_type_id: Mapped[int] = mapped_column(ForeignKey("transaction_types.id"), nullable=False)
-    debit_amount: Mapped[float] = mapped_column(
+    debit_amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=0, nullable=False
     )
-    credit_amount: Mapped[float] = mapped_column(
+    credit_amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=0, nullable=False
     )
 

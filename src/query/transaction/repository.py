@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.user import User
+from src.db.schemas.account import Account
 from src.db.schemas.transaction import Transaction
 from src.query.interface.eager_loadable import EagerLoadable
 from src.query import GenericRepository
@@ -53,9 +53,8 @@ class TransactionRepository(
                     select(Transaction)
                     .where(Transaction.id == id)
                     .options(
-                        selectinload(
-                            Transaction.debit_account, Transaction.credit_account
-                        )
+                        selectinload(Transaction.debit_account).selectinload(Account.storage),
+                        selectinload(Transaction.credit_account)
                     )
                 )
             ).one_or_none()
@@ -82,13 +81,14 @@ class TransactionRepository(
         """
         stmt = (
             select(Transaction)
-            .where(User.id == user_id)
+            .where(Transaction.user_id == user_id)
             .order_by(Transaction.created_at.desc())
             .limit(limit)
         )
         if eager:
             stmt = stmt.options(
-                selectinload(Transaction.credit_account, Transaction.debit_account)
+                selectinload(Transaction.debit_account).selectinload(Account.storage),
+                selectinload(Transaction.credit_account)
             )
 
         return (await self._session.scalars(stmt)).all()

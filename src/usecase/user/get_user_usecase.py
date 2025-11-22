@@ -1,8 +1,8 @@
 from typing import Optional, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.query import GenericRepository
 from src.db.schemas.user import User
+from src.query.user import UserRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 
 
@@ -13,7 +13,7 @@ class GetUserUsecase(AbstractUsecase[Optional[User]]):
     """
     def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
-        self.user_repo = GenericRepository[User, int](User, self._session)
+        self.user_repo = UserRepository(self._session)
 
     @override
     async def execute(self, user_id: int) -> Optional[User]:

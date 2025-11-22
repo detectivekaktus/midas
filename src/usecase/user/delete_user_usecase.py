@@ -1,10 +1,9 @@
 from typing import override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.user import User
-from src.query import GenericRepository
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
+from src.query.user import UserRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 
 
@@ -17,7 +16,7 @@ class DeleteUserUsecase(AbstractUsecase[None]):
     @override
     def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
-        self._user_repo = GenericRepository[User, int](User, self._session)
+        self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
         self._storage_repo = StorageRepository(self._session)
 

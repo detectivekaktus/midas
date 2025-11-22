@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from decimal import Decimal
 from typing import Optional
 from uuid import uuid4
 from sqlalchemy import TIMESTAMP, ForeignKey, Numeric, String, Uuid, func
@@ -16,7 +17,7 @@ class Transaction(Base):
     | Account name | Debit | Credit |
     +--------------+-------+--------+
     | Income       | X     |        |
-    | Income debit |       | X      |
+    | Income debt  |       | X      |
     ```
 
     Since it would be useless to keep the income debit account, income
@@ -26,12 +27,12 @@ class Transaction(Base):
     id:                     uuid primary key
     user_id:                int foreign key not null
     transaction_type_id:    int foreign key not null
-    created_at:             timestamp (without tz) default now not null
+    created_at:             timestamp default now not null
     title:                  varchar(64) not null
     description:            varchar(256)
     amount:                 Numeric(12, 2) not null
     debit_account_id:       int foreign key not null
-    credit_account_id:      int foreign key not null
+    credit_account_id:      int foreign key
     """
 
     __tablename__ = "transactions"
@@ -48,7 +49,7 @@ class Transaction(Base):
     )
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(256), nullable=True)
-    amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     debit_account_id: Mapped[int] = mapped_column(
         ForeignKey("accounts.id"), nullable=False
     )

@@ -1,10 +1,9 @@
 from pytest import fixture, mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.user import User
-from src.query import GenericRepository
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
+from src.query.user import UserRepository
 from src.usecase.user import DeleteUserUsecase
 from src.util.enums import Currency, TransactionType
 
@@ -26,7 +25,7 @@ async def test_register_user_and_delete_their_profile_and_data(
     await test_delete_usecase.execute(user_id)
 
     session = AsyncSession(test_engine)
-    user_repo = GenericRepository[User, int](User, session)
+    user_repo = UserRepository(session)
     account_repo = AccountRepository(session)
     storage_repo = StorageRepository(session)
 

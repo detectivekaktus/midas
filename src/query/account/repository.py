@@ -18,6 +18,10 @@ class AccountRepository(GenericRepository[Account, int], EagerLoadable[Account, 
     However, this class is specific to `accounts` table in
     the database and has methods that are specific to their
     manipulation.
+
+    The class also implements interface `EagerLoadable`, so
+    the fetch method can use eager loading mechanisms of
+    sqlalchemy.
     """
 
     @override

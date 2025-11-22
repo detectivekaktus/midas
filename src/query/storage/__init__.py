@@ -1,3 +1,3 @@
 from .repository import StorageRepository
 
-__all__ = ("StorageRepostory",)
+__all__ = ("StorageRepository",)

@@ -38,7 +38,7 @@ class Account(Base):
         foreign_keys="[Transaction.credit_account_id]",
         back_populates="credit_account",
     )
-    storage = relationship("Storage", back_populates="account")
+    storage = relationship("Storage", back_populates="account", uselist=False)
     transaction_type = relationship("TransactionType", back_populates="accounts")
 
     def __repr__(self) -> str:

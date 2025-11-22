@@ -1,10 +1,9 @@
 from pytest import mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.query import GenericRepository
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
-from src.db.schemas.user import User
+from src.query.user import UserRepository
 from src.util.enums import Currency, TransactionType
 
 
@@ -16,7 +15,7 @@ async def test_register_user(test_engine, test_register_usecase):
     await test_register_usecase.execute(user_id, currency)
 
     session = AsyncSession(test_engine)
-    user_repo = GenericRepository[User, int](User, session)
+    user_repo = UserRepository(session)
     account_repo = AccountRepository(session)
     storage_repo = StorageRepository(session)
 

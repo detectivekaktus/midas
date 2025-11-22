@@ -2,9 +2,9 @@ from typing import override
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.query import GenericRepository
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
+from src.query.user import UserRepository
 from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
@@ -27,7 +27,7 @@ class RegisterUserUsecase(AbstractUsecase[None]):
         See `AbstractUsecase` for more details.
         """
         super().__init__(session)
-        self._user_repo = GenericRepository[User, int](User, self._session)
+        self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
         self._storage_repo = StorageRepository(self._session)
 

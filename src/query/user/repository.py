@@ -41,7 +41,7 @@ class UserRepository(GenericRepository[User, int], EagerLoadable[User, int]):
         :type eager: bool
         :return: user associated with the id or `None` if no user
         exists with the provided id.
-        :rtype: Optional[T]
+        :rtype: Optional[User]
         """
         if eager:
             return (

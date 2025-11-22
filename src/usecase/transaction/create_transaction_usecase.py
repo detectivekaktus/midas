@@ -34,7 +34,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         user_id: int,
         transaction_type: TransactionType,
         title: str,
-        amount: float,
+        amount: Decimal,
         description: Optional[str] = None,
     ) -> None:
         """
@@ -52,8 +52,6 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         :param description: transaction description
         :type description: Optional[str]
         """
-        converted_amount = Decimal(str(amount))
-
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
@@ -76,8 +74,8 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 # | Income      | amount |        |
                 # | Income debt |        | amount |
                 # +-------------+--------+--------+
-                debit_account.debit_amount += converted_amount
-                storage.amount += converted_amount
+                debit_account.debit_amount += amount
+                storage.amount += amount
             else:
                 # same here
                 debit_account: Account = (
@@ -95,16 +93,16 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 # | Income      |        | amount |
                 # +-------------+--------+--------+
 
-                debit_account.debit_amount += converted_amount
-                credit_account.credit_amount += converted_amount
-                storage.amount -= converted_amount
+                debit_account.debit_amount += amount
+                credit_account.credit_amount += amount
+                storage.amount -= amount
 
             transaction = Transaction(
                 user_id=user_id,
                 transaction_type_id=transaction_type,
                 title=title,
                 description=description,
-                amount=converted_amount,
+                amount=amount,
                 debit_account_id=debit_account.id,
                 credit_account_id=credit_account.id if credit_account is not None else None
             )

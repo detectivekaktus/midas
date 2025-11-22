@@ -14,11 +14,11 @@ class TransactionRepository(
     GenericRepository[Transaction, UUID], EagerLoadable[Transaction, UUID]
 ):
     """
-    Account repository class.
+    Transaction repository class.
 
     This class inherits from `GenericRepository` class,
     thus provides the same functionality at its core.
-    However, this class is specific to `accounts` table in
+    However, this class is specific to `transaction` table in
     the database and has methods that are specific to their
     manipulation.
 

@@ -49,6 +49,9 @@ class TransactionType(IntEnum):
 
         :return: enum value
         :rtype: TransactionType
+
+        :raise KeyError: if `readable` is not a valid enum
+        value name.
         """
         name = readable.upper().replace(" ", "_")
         return TransactionType[name]

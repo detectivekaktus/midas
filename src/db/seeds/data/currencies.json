@@ -13,15 +13,5 @@
         "name": "Ukrainian Hryvnia",
         "code": "UAH",
         "symbol": "₴"
-    },
-    {
-        "name": "Bitcoin",
-        "code": "BTC",
-        "symbol": "BTC"
-    },
-    {
-        "name": "Ethereum",
-        "code": "ETH",
-        "symbol": "ETH"
     }
 ]

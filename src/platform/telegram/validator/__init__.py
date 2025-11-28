@@ -1,3 +1,3 @@
-from .common import YesNoAnswer
+from .common import YesNoAnswer, SkipAnswer
 
-__all__ = ("YesNoAnswer",)
+__all__ = ("YesNoAnswer", "SkipAnswer")

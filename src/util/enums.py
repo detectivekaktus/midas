@@ -1,4 +1,4 @@
-from enum import IntEnum, StrEnum
+from enum import IntEnum
 
 
 class Currency(IntEnum):
@@ -12,23 +12,6 @@ class Currency(IntEnum):
     EUR = 1
     USD = 2
     UAH = 3
-    BTC = 4
-    ETH = 5
-
-
-class StrCurrency(StrEnum):
-    """
-    Currency string enum. Each element corrisponds to the `code`
-    column inside `currencies` table.
-
-    Note that in case of adding more seed values you must update
-    this enumeration.
-    """
-    EUR = "EUR"
-    USD = "USD"
-    UAH = "UAH"
-    BTC = "BTC"
-    ETH = "ETH"
 
 
 class TransactionType(IntEnum):
@@ -49,3 +32,23 @@ class TransactionType(IntEnum):
     HEALTHCARE      = 8
     TRAVEL          = 9
     OTHER           = 10
+
+    def readable(self) -> str:
+        """
+        Transform enum value to human-readable string.
+
+        :return: human-readable string from enum value.
+        :rtype: str
+        """
+        return self.name.lower().replace("_", " ").capitalize()
+
+    @staticmethod
+    def from_readable(readable: str) -> "TransactionType":
+        """
+        Get enum values from human-readable string.
+
+        :return: enum value
+        :rtype: TransactionType
+        """
+        name = readable.upper().replace(" ", "_")
+        return TransactionType[name]

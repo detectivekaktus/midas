@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from os import getenv
 from sys import stderr
 from typing import Optional

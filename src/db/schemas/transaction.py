@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from decimal import Decimal
 from typing import Optional
 from uuid import uuid4

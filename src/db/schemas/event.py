@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from decimal import Decimal
 from sqlalchemy import TIMESTAMP, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship

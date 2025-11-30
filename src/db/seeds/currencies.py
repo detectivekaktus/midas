@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from json import loads
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db import engine

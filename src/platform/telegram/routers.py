@@ -2,6 +2,7 @@ from aiogram import Dispatcher
 
 from .router import router as global_router
 from .router.user import router as user_router
+from .router.transaction import router as transaction_router
 from .middleware import AuthMiddleware
 
 # Global dispatcher (Router) object.
@@ -11,5 +12,4 @@ dp = Dispatcher()
 for middleware in [AuthMiddleware()]:
     dp.message.middleware(middleware)
 
-for router in [global_router, user_router]:
-    dp.include_router(router)
+dp.include_routers(global_router, user_router, transaction_router)

@@ -45,7 +45,7 @@ async def test_add_many_and_get_first_one(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -63,7 +63,7 @@ async def test_add_many_and_get_last_one(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -71,7 +71,7 @@ async def test_add_many_and_get_last_one(test_repo):
 
         assert fetched_user
         assert fetched_user.id == 123456786
-        assert fetched_user.currency_id == Currency.BTC
+        assert fetched_user.currency_id == Currency.EUR
 
 
 @mark.asyncio
@@ -81,7 +81,7 @@ async def test_add_many_and_get_all(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -113,7 +113,7 @@ async def test_add_many_and_update_first_one(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -133,7 +133,7 @@ async def test_add_many_and_update_last_one(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -177,7 +177,7 @@ async def test_add_many_and_delete_first_one(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -196,7 +196,7 @@ async def test_add_many_and_delete_last_one(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 
@@ -215,7 +215,7 @@ async def test_add_many_and_delete_all(test_repo):
             User(id=123456789, currency_id=Currency.EUR.value),
             User(id=123456788, currency_id=Currency.USD.value),
             User(id=123456787, currency_id=Currency.UAH.value),
-            User(id=123456786, currency_id=Currency.BTC.value),
+            User(id=123456786, currency_id=Currency.EUR.value),
         ]
         test_repo.add_many(users)
 

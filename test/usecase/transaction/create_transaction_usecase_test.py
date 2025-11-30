@@ -154,6 +154,9 @@ async def test_create_multiple_transactions(
 
         income_account_amount = Decimal("0")
         user_transactions = await transaction_repo.get_recent(user.id, eager=True)
+        # it needs to be reversed, because the `transactions` array contains
+        # the transactions in order from old to new ones.
+        user_transactions = reversed(user_transactions)
         for i, transaction in enumerate(user_transactions):
             assert transaction.user_id == transactions[i]["user_id"]
             assert (
@@ -167,12 +170,12 @@ async def test_create_multiple_transactions(
             credit_account = transaction.credit_account
             if transaction.transaction_type_id == TransactionType.INCOME:
                 income_account_amount += transaction.amount
-                
+
                 assert debit_account is not None
                 assert credit_account is None
             else:
                 income_account_amount -= transaction.amount
-                
+
                 assert debit_account is not None
                 assert debit_account.debit_amount == transactions[i]["amount"]
                 assert credit_account is not None

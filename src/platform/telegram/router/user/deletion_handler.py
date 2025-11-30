@@ -3,17 +3,18 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
+from src.usecase.user import DeleteUserUsecase
+
 from src.platform.telegram.validator import YesNoAnswer
 from src.platform.telegram.keyboard import get_yes_no_keyboard
 from src.platform.telegram.state import ConfirmForm
-from src.usecase.user import DeleteUserUsecase
 
 
 router = Router(name=__name__)
 
 
 @router.message(Command("delete_profile"))
-async def handle_delete_profile_command(message: Message, state: FSMContext) -> None:
+async def handle_delete_profile(message: Message, state: FSMContext) -> None:
     await state.set_state(ConfirmForm.confirm)
     await message.answer(
         "Are you sure you want to delete your profile?\n"
@@ -24,7 +25,7 @@ async def handle_delete_profile_command(message: Message, state: FSMContext) -> 
 
 
 @router.message(ConfirmForm.confirm, F.text == YesNoAnswer.NO)
-async def handle_no_delete_profile_command(message: Message, state: FSMContext) -> None:
+async def handle_reject_profile_deletion(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
         "Cancelled profile deletion.", reply_markup=ReplyKeyboardRemove()
@@ -32,9 +33,7 @@ async def handle_no_delete_profile_command(message: Message, state: FSMContext) 
 
 
 @router.message(ConfirmForm.confirm, F.text == YesNoAnswer.YES)
-async def handle_yes_delete_profile_command(
-    message: Message, state: FSMContext
-) -> None:
+async def handle_confirm_profile_deletion(message: Message, state: FSMContext) -> None:
     await state.clear()
 
     user = message.from_user
@@ -54,7 +53,7 @@ async def handle_yes_delete_profile_command(
 
 
 @router.message(ConfirmForm.confirm)
-async def handle_invalid_delete_profile_command(message: Message) -> None:
+async def handle_invalid_option(message: Message) -> None:
     await message.answer(
         "Please, select an option from a list below.",
         reply_markup=get_yes_no_keyboard(),

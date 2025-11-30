@@ -25,7 +25,7 @@ async def handle_start_command(message: Message, state: FSMContext) -> None:
 
 
 @router.message(UserRegistrationForm.currency, valid_currency_filter)
-async def handle_registation_currency(
+async def handle_currency(
     message: Message, state: FSMContext, currency: Currency
 ) -> None:
     await state.clear()
@@ -47,7 +47,7 @@ async def handle_registation_currency(
 
 
 @router.message(UserRegistrationForm.currency)
-async def handle_invalid_registration_currency(message: Message) -> None:
+async def handle_invalid_currency(message: Message) -> None:
     await message.answer(
         "Please, specify a valid currency.", reply_markup=get_currency_keyboard()
     )

@@ -9,7 +9,7 @@ router = Router(name=__name__)
 
 @router.message(Command("cancel"))
 @router.message(F.text.casefold() == "cancel")
-async def cancel_handler(message: Message, state: FSMContext) -> None:
+async def handle_global_cancel(message: Message, state: FSMContext) -> None:
     """
     Allow user to cancel any state action.
     """

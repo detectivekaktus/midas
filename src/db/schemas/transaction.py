@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Optional
 from uuid import uuid4
@@ -43,8 +44,16 @@ class Transaction(Base):
     )
     created_at = mapped_column(
         TIMESTAMP(timezone=True),
+        default=datetime.now(timezone.utc),
         server_default=func.now(),
         nullable=False,
+    )
+    updated_at = mapped_column(
+        TIMESTAMP(timezone=True),
+        default=None,
+        server_default=None,
+        onupdate=datetime.now(timezone.utc),
+        nullable=True,
     )
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(256), nullable=True)

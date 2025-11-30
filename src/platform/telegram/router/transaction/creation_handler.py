@@ -19,7 +19,7 @@ router = Router(name=__name__)
 
 
 @router.message(Command("add_transaction"))
-async def handle_add_transaction(message: Message, state: FSMContext) -> None:
+async def handle_add_transaction_command(message: Message, state: FSMContext) -> None:
     if not message.from_user:
         return
     user_id = message.from_user.id

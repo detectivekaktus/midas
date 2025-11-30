@@ -93,9 +93,10 @@ async def handle_valid_amount(
         usecase = CreateTransactionUsecase()
         await usecase.execute(**data)
         await message.answer("👍")
-    except:
+    except Exception as e:
         # Should be unreachable.
         error(f"Transaction creation failed: {data}")
+        error(f"The problem to this was the following exception:\n{e}")
         await message.answer("Failed. An error has occured.")
 
 

@@ -56,7 +56,6 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
-                print("AAA" * 100)
                 raise ValueError(f"No user with {user_id} exists")
 
             # this is guaranteed to be an account instance because user exists.

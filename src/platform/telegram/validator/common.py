@@ -15,7 +15,7 @@ class SkipAnswer(StrEnum):
 
 def validate_amount(text: str) -> Decimal:
     """
-    Check if amount corrisponds to database Numeric(12, 2) definition. I.e.
+    Check if amount corresponds to database Numeric(12, 2) definition. I.e.
     12 digits total 2 of which are decimal.
 
     :param text: amount to check
@@ -27,7 +27,7 @@ def validate_amount(text: str) -> Decimal:
     # if text has decimal part and its length is greater than 13
     # or if text has no decimal part and its length is greater than 10
     if ("." in text and len(text) > 13) or ("." not in text and len(text) > 10):
-        raise ValueError(f"{text} does not corrispond to Numeric(12, 2) definition")
+        raise ValueError(f"{text} does not correspond to Numeric(12, 2) definition")
 
     if "." in text:
         decimal_part = text.split(".")[1]

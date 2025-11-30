@@ -44,7 +44,7 @@ class Transaction(Base):
     )
     created_at = mapped_column(
         TIMESTAMP(timezone=True),
-        default=datetime.now(timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
         server_default=func.now(),
         nullable=False,
     )
@@ -52,7 +52,7 @@ class Transaction(Base):
         TIMESTAMP(timezone=True),
         default=None,
         server_default=None,
-        onupdate=datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
         nullable=True,
     )
     title: Mapped[str] = mapped_column(String(64), nullable=False)

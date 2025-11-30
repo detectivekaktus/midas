@@ -13,8 +13,9 @@ def validate_transaction_type(text: str) -> TransactionType:
     :raise ValueError: if text is not a valid readable form of transaction type.
     """
     try:
-        # 👾 Other.split(" ") = "Other"
-        text = text.split(" ")[1]
+        # "👾 Other".split(" " , 1)[-1] = "Other"
+        # "Some invalid noise".split(" ", 1)[-1] = "Invalid noise"
+        text = text.split(" ", 1)[-1]
         return TransactionType.from_readable(text)
     except KeyError as e:
         raise ValueError(f"{text} is not a valid transaction type") from e

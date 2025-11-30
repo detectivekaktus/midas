@@ -1,4 +1,5 @@
 from decimal import Decimal
+from logging import debug
 from typing import Optional, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +18,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
     """
     Create transaction usecase class. This class is responsible for
     creating new transactions and their side effects, such as account
-    and storage amounts. 
+    and storage amounts.
     """
 
     @override
@@ -55,6 +56,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
+                print("AAA" * 100)
                 raise ValueError(f"No user with {user_id} exists")
 
             # this is guaranteed to be an account instance because user exists.
@@ -82,7 +84,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                     await self._account_repo.get_user_account_by_transaction_type(
                         user.id, transaction_type, eager=True
                     )
-                ) # type: ignore
+                )  # type: ignore
                 credit_account = income_account
                 storage: Storage = credit_account.storage
 
@@ -104,7 +106,9 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 description=description,
                 amount=amount,
                 debit_account_id=debit_account.id,
-                credit_account_id=credit_account.id if credit_account is not None else None
+                credit_account_id=(
+                    credit_account.id if credit_account is not None else None
+                ),
             )
             self._transaction_repo.add(transaction)
 

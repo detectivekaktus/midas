@@ -9,5 +9,5 @@ def get_transaction_type_keyboard() -> ReplyKeyboardMarkup:
     for type_ in get_transaction_type_list():
         builder.button(text=type_)
 
-    builder.adjust(4)
+    builder.adjust(3)
     return builder.as_markup(resize_keyboard=True)

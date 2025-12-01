@@ -1,6 +1,7 @@
 from typing import override
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from query.transaction.repository import TransactionRepository
 from src.loggers import app_logger
 
 from src.query.account import AccountRepository
@@ -21,6 +22,7 @@ class DeleteUserUsecase(AbstractUsecase[None]):
         self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
         self._storage_repo = StorageRepository(self._session)
+        self._transaction_repo = TransactionRepository(self._session)
 
     @override
     async def execute(self, user_id: int) -> None:
@@ -49,6 +51,7 @@ class DeleteUserUsecase(AbstractUsecase[None]):
                 )
                 raise ValueError(f"No user with {user_id} exists")
 
+            await self._transaction_repo.delete_all_by_user_id(user_id)
             await self._storage_repo.delete_all_by_user_id(user_id)
             await self._account_repo.delete_all_by_user_id(user_id)
             await self._user_repo.delete_by_id(user_id)

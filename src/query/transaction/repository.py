@@ -1,6 +1,6 @@
 from typing import Optional, Sequence, override
 from uuid import UUID
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,13 +53,26 @@ class TransactionRepository(
                     select(Transaction)
                     .where(Transaction.id == id)
                     .options(
-                        selectinload(Transaction.debit_account).selectinload(Account.storage),
-                        selectinload(Transaction.credit_account)
+                        selectinload(Transaction.debit_account).selectinload(
+                            Account.storage
+                        ),
+                        selectinload(Transaction.credit_account),
                     )
                 )
             ).one_or_none()
 
         return await super().get_by_id(id)
+
+    async def delete_all_by_user_id(self, user_id: int) -> None:
+        """
+        DELETE all rows where `transactions.user_id` = `user_id`.
+
+        :param user_id: user's telegram id
+        :type user_id: int
+        """
+        await self._session.execute(
+            delete(Transaction).where(Transaction.user_id == user_id)
+        )
 
     async def get_recent(
         self, user_id: int, limit: int = 10, eager: bool = False
@@ -88,7 +101,7 @@ class TransactionRepository(
         if eager:
             stmt = stmt.options(
                 selectinload(Transaction.debit_account).selectinload(Account.storage),
-                selectinload(Transaction.credit_account)
+                selectinload(Transaction.credit_account),
             )
 
         return (await self._session.scalars(stmt)).all()

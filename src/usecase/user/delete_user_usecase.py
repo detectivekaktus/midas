@@ -1,11 +1,11 @@
 from typing import override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from query.transaction.repository import TransactionRepository
 from src.loggers import app_logger
 
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
+from src.query.transaction import TransactionRepository
 from src.query.user import UserRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 

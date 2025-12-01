@@ -2,6 +2,8 @@ from typing import override
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.loggers import app_logger
+
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
 from src.query.user import UserRepository
@@ -48,9 +50,14 @@ class RegisterUserUsecase(AbstractUsecase[None]):
 
         :raise KeyError: if user with `user_id` already exists.
         """
+        app_logger.debug("Started `RegisterUserUsecase` execution")
+
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is not None:
+                app_logger.debug(
+                    "Finished `RegisterUserUsecase` execution too soon because user already exists"
+                )
                 raise KeyError("User already exists")
 
             user = User(id=user_id, currency_id=currency)
@@ -72,3 +79,5 @@ class RegisterUserUsecase(AbstractUsecase[None]):
             self._storage_repo.add(storage)
 
             await self._session.commit()
+
+        app_logger.debug("Successfully registered a user")

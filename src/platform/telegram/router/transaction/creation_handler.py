@@ -1,9 +1,10 @@
 from decimal import Decimal
-from logging import error
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
+
+from src.loggers import aiogram_logger
 
 from src.usecase.transaction import CreateTransactionUsecase
 from src.util.enums import TransactionType
@@ -20,11 +21,16 @@ router = Router(name=__name__)
 
 @router.message(Command("add_transaction"))
 async def handle_add_transaction_command(message: Message, state: FSMContext) -> None:
-    if not message.from_user:
+    user = message.from_user
+    if not user:
+        aiogram_logger.warning(
+            "Received `/add_transaction` command but couldn't get the user"
+        )
         return
-    user_id = message.from_user.id
 
-    await state.update_data(user_id=user_id)
+    aiogram_logger.info(f"Received `/add_transaction` command: {user.id}")
+
+    await state.update_data(user_id=user.id)
     await state.set_state(CreateTransactionForm.transaction_type)
     await message.answer(
         "What's the transaction type?", reply_markup=get_transaction_type_keyboard()
@@ -88,6 +94,7 @@ async def handle_valid_amount(
 ) -> None:
     data = await state.update_data(amount=amount)
     await state.clear()
+    aiogram_logger.info(f"Confirm transaction creation: {data.get("user_id")}")
 
     try:
         usecase = CreateTransactionUsecase()
@@ -95,8 +102,8 @@ async def handle_valid_amount(
         await message.answer("👍")
     except Exception as e:
         # Should be unreachable.
-        error(f"Transaction creation failed: {data}")
-        error(f"The problem to this was the following exception:\n{e}")
+        aiogram_logger.error(f"Transaction creation failed: {data}")
+        aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
         await message.answer("Failed. An error has occured.")
 
 

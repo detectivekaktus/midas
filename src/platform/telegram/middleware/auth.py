@@ -1,14 +1,15 @@
 from enum import StrEnum
-from logging import warning
 from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, Message
+
+from src.loggers import aiogram_logger
 
 from src.usecase.user import GetUserUsecase
 
 
 class AllowedCommand(StrEnum):
-    START  = "/start"
+    START = "/start"
     CANCEL = "/cancel"
 
 
@@ -22,6 +23,7 @@ class AuthMiddleware(BaseMiddleware):
         * unregistered user runs unallowed command.
         * registered user runs `/start` command.
     """
+
     def __init__(self) -> None:
         super().__init__()
         self._usecase = GetUserUsecase()
@@ -35,28 +37,28 @@ class AuthMiddleware(BaseMiddleware):
         telegram_user = event.from_user
         if telegram_user is None:
             await event.answer(
-                "You must register to use commands.\n"
-                "Register with /start command."
+                "You must register to use commands.\n" "Register with /start command."
             )
             return
 
         text = event.text
         if not text:
-            warning("Auth middleware found an event without `.text` attribute. Denying...")
+            aiogram_logger.warning(
+                "Auth middleware found an event without `message.text` attribute."
+            )
             return
 
         user = await self._usecase.execute(telegram_user.id)
         # If user is not registered and has sent a command and that command is not allowed.
-        if user is None and (text.startswith('/') and (text not in AllowedCommand)):
+        if user is None and (text.startswith("/") and (text not in AllowedCommand)):
             await event.answer(
-                "You must register to use commands.\n"
-                "Register with /start command."
+                "You must register to use commands.\n" "Register with /start command."
             )
             return
-        
+
         if user is not None and text == AllowedCommand.START:
             await event.answer(
-                "You are already registered.\n" \
+                "You are already registered.\n"
                 "If you want to delete your profile, use /delete_profile command."
             )
             return

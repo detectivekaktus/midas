@@ -1,6 +1,8 @@
 from typing import override
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.loggers import app_logger
+
 from src.query.account import AccountRepository
 from src.query.storage import StorageRepository
 from src.query.user import UserRepository
@@ -37,12 +39,19 @@ class DeleteUserUsecase(AbstractUsecase[None]):
 
         :raise ValueError: if no user with the provided id exists.
         """
+        app_logger.debug(f"Started `DeleteUserUsecase` execution: {user_id}")
+
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
+                app_logger.debug(
+                    "Finished `DeleteUserUsecase` execution too soon because user does not exist"
+                )
                 raise ValueError(f"No user with {user_id} exists")
-            
+
             await self._storage_repo.delete_all_by_user_id(user_id)
             await self._account_repo.delete_all_by_user_id(user_id)
             await self._user_repo.delete_by_id(user_id)
             await self._session.commit()
+
+        app_logger.debug(f"Successfully deleted the user: {user_id}")

@@ -1,7 +1,8 @@
 from decimal import Decimal
-from logging import debug
 from typing import Optional, override
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.loggers import app_logger
 
 from src.db.schemas.storage import Storage
 from src.db.schemas.account import Account
@@ -53,9 +54,16 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         :param description: transaction description
         :type description: Optional[str]
         """
+        app_logger.debug(
+            f"Started `CreateTransactionUsecase` execution: {user_id} - {transaction_type}"
+        )
+
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
+                app_logger.debug(
+                    "Finished `CreateTransactionUsecase` execution too soon because user does not exist"
+                )
                 raise ValueError(f"No user with {user_id} exists")
 
             # this is guaranteed to be an account instance because user exists.
@@ -112,3 +120,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
             self._transaction_repo.add(transaction)
 
             await self._session.commit()
+
+        app_logger.debug(
+            f"Successfully created a transaction: {user_id} - {transaction_type}"
+        )

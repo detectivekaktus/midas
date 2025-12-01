@@ -3,6 +3,8 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
+from src.loggers import aiogram_logger
+
 from src.util.enums import Currency
 from src.usecase.user import RegisterUserUsecase
 
@@ -16,7 +18,15 @@ router = Router(name=__name__)
 
 @router.message(Command("start"))
 async def handle_start_command(message: Message, state: FSMContext) -> None:
+    user = message.from_user
+    if not user:
+        aiogram_logger.warning("Received `/start` command but couldn't get the user")
+        return
+
+    aiogram_logger.info(f"Received `/start` command: {user.id}")
+
     await state.set_state(UserRegistrationForm.currency)
+    await state.update_data(user_id=user.id)
     await message.answer(
         "Hello 👋 Let's start tracking your expenses.\n"
         "What's your preferred currency?",
@@ -28,19 +38,22 @@ async def handle_start_command(message: Message, state: FSMContext) -> None:
 async def handle_currency(
     message: Message, state: FSMContext, currency: Currency
 ) -> None:
+    data = await state.update_data(currency=currency)
     await state.clear()
-
-    user = message.from_user
-    if not user:
-        return
+    aiogram_logger.info(f"Confirmed registration: {data.get("user_id")}")
 
     try:
         usecase = RegisterUserUsecase()
-        await usecase.execute(user.id, currency)
+        await usecase.execute(**data)
         await message.answer(
             "You've been successfully registered 🥳", reply_markup=ReplyKeyboardRemove()
         )
     except KeyError:
+        aiogram_logger.warning(
+            "Auth middleware malfunction. "
+            f"Account creation failed: {data.get("user_id")} is already registered"
+        )
+
         await message.answer(
             "You're already registered 🚫", reply_markup=ReplyKeyboardRemove()
         )

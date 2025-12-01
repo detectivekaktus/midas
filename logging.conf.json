@@ -25,7 +25,7 @@
     },
     "loggers": {
         "root": {
-            "level": "INFO",
+            "level": "DEBUG",
             "handlers": [
                 "stderr",
                 "file"

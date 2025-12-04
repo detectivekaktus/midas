@@ -1,17 +1,19 @@
 from typing import Sequence
-from aiogram import Router, html
+from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 
 from src.loggers import aiogram_logger
 
+from src.db.schemas.transaction import Transaction
 from src.db.schemas.user import User
 from src.usecase.transaction import GetTransactionsUsecase
 from src.util.enums import Currency, TransactionType
 
-from src.db.schemas.transaction import Transaction
 from src.platform.telegram.keyboard.inline.transaction import (
+    Command as PaginationCommand,
+    TransactionPaginationCommand,
     get_transaction_pagination_inline_keyboard,
 )
 from src.platform.telegram.state.transaction import TransactionPaginationState
@@ -83,3 +85,19 @@ async def handle_transactions_command(
     await message.answer(
         text, reply_markup=get_transaction_pagination_inline_keyboard()
     )
+
+
+@router.callback_query(
+    TransactionPaginationCommand.filter(F.command == PaginationCommand.EXIT),
+    TransactionPaginationState.show,
+)
+async def handle_exit_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    await query.answer()
+
+    message = query.message
+    if not message:
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        return
+
+    await message.answer("👍")

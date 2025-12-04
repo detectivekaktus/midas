@@ -10,7 +10,7 @@ class Command(IntEnum):
     NEXT = 2
 
 
-class TransactionPaginationCallbackData(CallbackData, prefix="trans-pag"):
+class TransactionPaginationCommand(CallbackData, prefix="trans-pag"):
     command: Command
 
 
@@ -18,14 +18,14 @@ def get_transaction_pagination_inline_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="🔙",
-        callback_data=TransactionPaginationCallbackData(command=Command.EXIT),
+        callback_data=TransactionPaginationCommand(command=Command.EXIT),
     )
     builder.button(
         text="◀️",
-        callback_data=TransactionPaginationCallbackData(command=Command.PREV),
+        callback_data=TransactionPaginationCommand(command=Command.PREV),
     )
     builder.button(
         text="▶️",
-        callback_data=TransactionPaginationCallbackData(command=Command.NEXT),
+        callback_data=TransactionPaginationCommand(command=Command.NEXT),
     )
     return builder.as_markup()

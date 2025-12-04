@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from src.loggers import aiogram_logger
 
+from src.db.schemas.user import User
 from src.usecase.user import DeleteUserUsecase
 
 from src.platform.telegram.validator import YesNoAnswer
@@ -16,14 +17,9 @@ router = Router(name=__name__)
 
 
 @router.message(Command("delete_profile"))
-async def handle_delete_profile(message: Message, state: FSMContext) -> None:
-    user = message.from_user
-    if not user:
-        aiogram_logger.warning(
-            "Received `/delete_profile` command but couldn't get the user"
-        )
-        return
-
+async def handle_delete_profile(
+    message: Message, state: FSMContext, user: User
+) -> None:
     aiogram_logger.info(f"Received `/delete_profile` command: {user.id}")
 
     await state.set_state(ConfirmForm.confirm)
@@ -70,6 +66,6 @@ async def handle_confirm_profile_deletion(message: Message, state: FSMContext) -
 @router.message(ConfirmForm.confirm)
 async def handle_invalid_option(message: Message) -> None:
     await message.answer(
-        "Please, select an option from a list below.",
+        "Please, select an option from the list below.",
         reply_markup=get_yes_no_keyboard(),
     )

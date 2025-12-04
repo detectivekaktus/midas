@@ -1,20 +1,12 @@
 from decimal import Decimal
-from pytest import fixture, mark
+from pytest import mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.schemas.storage import Storage
 from src.db.schemas.account import Account
 from src.query.user import UserRepository
 from src.query.transaction import TransactionRepository
-from src.usecase.transaction import CreateTransactionUsecase
 from src.util.enums import Currency, TransactionType
-
-
-@fixture
-def test_create_transaction(test_engine) -> CreateTransactionUsecase:
-    session = AsyncSession(test_engine)
-    usecase = CreateTransactionUsecase(session=session)
-    return usecase
 
 
 @mark.asyncio

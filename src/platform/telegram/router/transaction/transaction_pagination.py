@@ -2,7 +2,7 @@ from typing import Sequence
 from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, InaccessibleMessage, Message
 
 from src.loggers import aiogram_logger
 
@@ -83,6 +83,40 @@ async def handle_transactions_command(
 
     text = render_transaction(transactions[current], Currency(user.currency_id))
     await message.answer(
+        text, reply_markup=get_transaction_pagination_inline_keyboard()
+    )
+
+
+@router.callback_query(
+    TransactionPaginationCommand.filter(F.command == PaginationCommand.NEXT),
+    TransactionPaginationState.show,
+)
+async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    user: User = data["user"]
+    current: int = data["current"]
+    max_transactions: int = data["max_transactions"]
+    transactions: Sequence[Transaction] = data["transactions"]
+
+    current += 1
+    if len(transactions) != max_transactions and len(transactions) == current:
+        await query.answer("No more transactions available.")
+        return
+    elif max_transactions == current:
+        max_transactions *= 2
+        transactions = await get_transactions(user.id, max_transactions)
+        await state.update_data(transactions=transactions)
+        await state.update_data(max_transactions=max_transactions)
+    await state.update_data(current=current)
+
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        return
+
+    text = render_transaction(transactions[current], Currency(user.currency_id))
+    await query.answer()
+    await message.edit_text(
         text, reply_markup=get_transaction_pagination_inline_keyboard()
     )
 

@@ -15,3 +15,7 @@ class CreateTransactionForm(StatesGroup):
     transaction_type = State()
     description = State()
     amount = State()
+
+
+class TransactionPaginationState(StatesGroup):
+    show = State()

@@ -112,6 +112,37 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
     message = query.message
     if not message or isinstance(message, InaccessibleMessage):
         aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
+        return
+
+    text = render_transaction(transactions[current], Currency(user.currency_id))
+    await query.answer()
+    await message.edit_text(
+        text, reply_markup=get_transaction_pagination_inline_keyboard()
+    )
+
+
+@router.callback_query(
+    TransactionPaginationCommand.filter(F.command == PaginationCommand.PREV),
+    TransactionPaginationState.show,
+)
+async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    user: User = data["user"]
+    current: int = data["current"]
+    transactions: Sequence[Transaction] = data["transactions"]
+
+    if current == 0:
+        await query.answer("Already at the first transaction.")
+        return
+
+    current -= 1
+    await state.update_data(current=current)
+
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
         return
 
     text = render_transaction(transactions[current], Currency(user.currency_id))

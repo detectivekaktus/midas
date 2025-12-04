@@ -1,10 +1,9 @@
 from decimal import Decimal
-from aiogram.enums import Currency
 from pytest import fixture, mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.usecase.transaction import GetTransactionsUsecase
-from src.util.enums import TransactionType
+from src.util.enums import Currency, TransactionType
 
 
 @fixture

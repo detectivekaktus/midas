@@ -6,6 +6,7 @@ from aiogram.types import Message, ReplyKeyboardRemove
 
 from src.loggers import aiogram_logger
 
+from src.db.schemas.user import User
 from src.usecase.transaction import CreateTransactionUsecase
 from src.util.enums import TransactionType
 
@@ -20,14 +21,9 @@ router = Router(name=__name__)
 
 
 @router.message(Command("add_transaction"))
-async def handle_add_transaction_command(message: Message, state: FSMContext) -> None:
-    user = message.from_user
-    if not user:
-        aiogram_logger.warning(
-            "Received `/add_transaction` command but couldn't get the user"
-        )
-        return
-
+async def handle_add_transaction_command(
+    message: Message, state: FSMContext, user: User
+) -> None:
     aiogram_logger.info(f"Received `/add_transaction` command: {user.id}")
 
     await state.update_data(user_id=user.id)

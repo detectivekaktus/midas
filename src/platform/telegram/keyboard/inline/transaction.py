@@ -8,6 +8,7 @@ class Command(IntEnum):
     EXIT = 0
     PREV = 1
     NEXT = 2
+    DELETE = 3
 
 
 class TransactionPaginationCommand(CallbackData, prefix="trans-pag"):
@@ -23,6 +24,10 @@ def get_transaction_pagination_inline_keyboard() -> InlineKeyboardMarkup:
     builder.button(
         text="◀️",
         callback_data=TransactionPaginationCommand(command=Command.PREV),
+    )
+    builder.button(
+        text="❌",
+        callback_data=TransactionPaginationCommand(command=Command.DELETE),
     )
     builder.button(
         text="▶️",

@@ -95,10 +95,12 @@ async def handle_transactions_command(
         await message.answer("Nothing to display ☹️")
         return
 
-    await state.update_data(user=user)
-    await state.update_data(transactions=transactions)
-    await state.update_data(current=current)
-    await state.update_data(max_transactions=max_transactions)
+    await state.update_data(
+        user=user,
+        transactions=transactions,
+        current=current,
+        max_transactions=max_transactions,
+    )
     await state.set_state(TransactionPaginationState.show)
 
     text = render_transaction(transactions[current], Currency(user.currency_id))
@@ -125,8 +127,9 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
     elif max_transactions == current:
         max_transactions *= 2
         transactions = await get_transactions(user.id, max_transactions)
-        await state.update_data(transactions=transactions)
-        await state.update_data(max_transactions=max_transactions)
+        await state.update_data(
+            transactions=transactions, max_transactions=max_transactions
+        )
     await state.update_data(current=current)
 
     await answer_query(query, transactions[current], Currency(user.currency_id))
@@ -177,9 +180,8 @@ async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) 
         return
 
     transactions.pop(current)
-    current -= 1
-    await state.update_data(current=current)
-    await state.update_data(transactions=transactions)
+    current -= 1 if current != 0 else 0
+    await state.update_data(current=current, transactions=transactions)
 
     await answer_query(query, transactions[current], Currency(user.currency_id))
 

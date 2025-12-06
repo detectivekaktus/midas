@@ -1,4 +1,5 @@
-from typing import Sequence
+from typing import Sequence, cast
+from uuid import UUID
 from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
@@ -8,7 +9,7 @@ from src.loggers import aiogram_logger
 
 from src.db.schemas.transaction import Transaction
 from src.db.schemas.user import User
-from src.usecase.transaction import GetTransactionsUsecase
+from src.usecase.transaction import DeleteTransactionUsecase, GetTransactionsUsecase
 from src.util.enums import Currency, TransactionType
 
 from src.platform.telegram.keyboard.inline.transaction import (
@@ -61,6 +62,25 @@ def render_transaction(transaction: Transaction, currency: Currency) -> str:
     return text
 
 
+async def answer_query(
+    query: CallbackQuery, transaction: Transaction, currency: Currency
+) -> None:
+    """
+    Answer callback query, render and send back transaction page.
+    """
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
+        return
+
+    await query.answer()
+    text = render_transaction(transaction, currency)
+    await message.edit_text(
+        text, reply_markup=get_transaction_pagination_inline_keyboard()
+    )
+
+
 @router.message(Command("transactions"))
 async def handle_transactions_command(
     message: Message, state: FSMContext, user: User
@@ -75,10 +95,12 @@ async def handle_transactions_command(
         await message.answer("Nothing to display ☹️")
         return
 
-    await state.update_data(user=user)
-    await state.update_data(transactions=transactions)
-    await state.update_data(current=current)
-    await state.update_data(max_transactions=max_transactions)
+    await state.update_data(
+        user=user,
+        transactions=transactions,
+        current=current,
+        max_transactions=max_transactions,
+    )
     await state.set_state(TransactionPaginationState.show)
 
     text = render_transaction(transactions[current], Currency(user.currency_id))
@@ -105,21 +127,12 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
     elif max_transactions == current:
         max_transactions *= 2
         transactions = await get_transactions(user.id, max_transactions)
-        await state.update_data(transactions=transactions)
-        await state.update_data(max_transactions=max_transactions)
+        await state.update_data(
+            transactions=transactions, max_transactions=max_transactions
+        )
     await state.update_data(current=current)
 
-    message = query.message
-    if not message or isinstance(message, InaccessibleMessage):
-        aiogram_logger.warning("Couldn't find message bound to the callback query.")
-        await query.answer("If you see this message, report a bug on github.")
-        return
-
-    text = render_transaction(transactions[current], Currency(user.currency_id))
-    await query.answer()
-    await message.edit_text(
-        text, reply_markup=get_transaction_pagination_inline_keyboard()
-    )
+    await answer_query(query, transactions[current], Currency(user.currency_id))
 
 
 @router.callback_query(
@@ -139,17 +152,38 @@ async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) ->
     current -= 1
     await state.update_data(current=current)
 
+    await answer_query(query, transactions[current], Currency(user.currency_id))
+
+
+@router.callback_query(
+    TransactionPaginationCommand.filter(F.command == PaginationCommand.DELETE),
+    TransactionPaginationState.show,
+)
+async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    user: User = data["user"]
+    current: int = data["current"]
+    transactions: list[Transaction] = data["transactions"]
+
+    usecase = DeleteTransactionUsecase()
+    await usecase.execute(cast(UUID, transactions[current].id))
+
     message = query.message
     if not message or isinstance(message, InaccessibleMessage):
         aiogram_logger.warning("Couldn't find message bound to the callback query.")
         await query.answer("If you see this message, report a bug on github.")
         return
 
-    text = render_transaction(transactions[current], Currency(user.currency_id))
-    await query.answer()
-    await message.edit_text(
-        text, reply_markup=get_transaction_pagination_inline_keyboard()
-    )
+    if len(transactions) == 1:
+        await state.clear()
+        await message.edit_text(text="Nothing to display ☹️")
+        return
+
+    transactions.pop(current)
+    current -= 1 if current != 0 else 0
+    await state.update_data(current=current, transactions=transactions)
+
+    await answer_query(query, transactions[current], Currency(user.currency_id))
 
 
 @router.callback_query(

@@ -1,12 +1,24 @@
 from decimal import Decimal
 from pytest import fixture, mark
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.usecase.transaction import DeleteTransactionUsecase
 from src.util.enums import Currency, TransactionType
 
 
+@fixture
+def test_delete_transaction(test_engine) -> DeleteTransactionUsecase:
+    session = AsyncSession(test_engine)
+    usecase = DeleteTransactionUsecase(session=session)
+    return usecase
+
+
 @mark.asyncio
-async def test_create_income_transaction_and_get_it_back(
-    test_register_usecase, test_create_transaction, test_get_transactions
+async def test_create_income_transaction_and_delete_it(
+    test_register_usecase,
+    test_create_transaction,
+    test_get_transactions,
+    test_delete_transaction,
 ):
     user_id = 123456789
     currency = Currency.EUR
@@ -21,16 +33,18 @@ async def test_create_income_transaction_and_get_it_back(
     await test_create_transaction.execute(**transaction_data)
 
     transactions = await test_get_transactions.execute(user_id)
-    for transaction in transactions:
-        assert transaction.user_id == transaction_data["user_id"]
-        assert transaction.transaction_type_id == transaction_data["transaction_type"]
-        assert transaction.title == transaction_data["title"]
-        assert transaction.amount == transaction_data["amount"]
+    await test_delete_transaction.execute(transactions[0].id)
+
+    transactions = await test_get_transactions.execute(user_id)
+    assert len(transactions) == 0
 
 
 @mark.asyncio
-async def test_add_4_transactions_and_get_them_back(
-    test_register_usecase, test_create_transaction, test_get_transactions
+async def test_add_4_transactions_and_delete_them(
+    test_register_usecase,
+    test_create_transaction,
+    test_get_transactions,
+    test_delete_transaction,
 ):
     user_id = 123456789
     currency = Currency.EUR
@@ -71,12 +85,8 @@ async def test_add_4_transactions_and_get_them_back(
         await test_create_transaction.execute(**transaction)
 
     transactions = await test_get_transactions.execute(user_id)
-    transactions = reversed(transactions)
-    for i, transaction in enumerate(transactions):
-        assert transaction.user_id == transaction_data[i]["user_id"]
-        assert (
-            transaction.transaction_type_id == transaction_data[i]["transaction_type"]
-        )
-        assert transaction.title == transaction_data[i]["title"]
-        assert transaction.amount == transaction_data[i]["amount"]
-        assert transaction.description == transaction_data[i]["description"]
+    for transaction in transactions:
+        await test_delete_transaction.execute(transaction.id)
+
+    transactions = await test_get_transactions.execute(user_id)
+    assert len(transactions) == 0

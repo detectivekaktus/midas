@@ -1,8 +1,8 @@
 from aiogram import Router
-from .creation_handler import router as creation_router
+from .form_handler import router as form_router
 from .pagination_handler import router as pagination_router
 
 router = Router(name=__name__)
-router.include_routers(creation_router, pagination_router)
+router.include_routers(form_router, pagination_router)
 
 __all__ = ("router",)

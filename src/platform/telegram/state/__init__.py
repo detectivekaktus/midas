@@ -1,3 +1,3 @@
-from .common import ConfirmForm
+from .common import ConfirmForm, FormMode
 
-__all__ = ("ConfirmForm",)
+__all__ = ("ConfirmForm", "FormMode")

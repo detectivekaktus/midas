@@ -1,16 +1,11 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-class CreateTransactionForm(StatesGroup):
+class TransactionForm(StatesGroup):
     """
-    Create transaction form.
-
-    This form contains all essential data for creating
-    a transaction required for `CreateTransactionUsecase`
-    class.
+    Transaction form.
     """
 
-    user_id = State()
     title = State()
     transaction_type = State()
     description = State()

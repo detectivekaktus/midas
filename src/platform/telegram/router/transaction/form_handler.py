@@ -7,8 +7,9 @@ from aiogram.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 from src.loggers import aiogram_logger
 
+from src.db.schemas.transaction import Transaction
 from src.db.schemas.user import User
-from src.usecase.transaction import CreateTransactionUsecase
+from src.usecase.transaction import CreateTransactionUsecase, EditTransactionUsecase
 from src.util.enums import TransactionType
 
 from src.platform.telegram.keyboard import get_skip_keyboard
@@ -85,7 +86,14 @@ async def handle_valid_type(
             "Enter the transaction title.", reply_markup=ReplyKeyboardRemove()
         )
     else:
-        ...
+        if transaction_type is not None and message.text != SkipAnswer.SKIP:
+            await state.update_data(transaction_type=transaction_type)
+
+        transaction: Transaction = await state.get_value("transaction")  # type: ignore
+        await message.answer(
+            f"Enter new transaction title. (current: {transaction.title})",
+            reply_markup=get_skip_keyboard(),
+        )
 
     await state.set_state(TransactionForm.title)
 
@@ -109,7 +117,14 @@ async def handle_valid_title(message: Message, state: FSMContext) -> None:
             "Optional: add a description.", reply_markup=get_skip_keyboard()
         )
     else:
-        ...
+        if message.text != SkipAnswer.SKIP:
+            await state.update_data(title=message.text)
+
+        transaction: Transaction = await state.get_value("transaction")  # type: ignore
+        await message.answer(
+            f"Add new description. (current: {transaction.description})",
+            reply_markup=get_skip_keyboard(),
+        )
 
     await state.set_state(TransactionForm.description)
 
@@ -131,7 +146,11 @@ async def handle_valid_description(message: Message, state: FSMContext) -> None:
             "Enter the transaction amount.", reply_markup=ReplyKeyboardRemove()
         )
     else:
-        ...
+        transaction: Transaction = await state.get_value("transaction")  # type: ignore
+        await message.answer(
+            f"Enter new transaction amount. (current: {transaction.amount})",
+            reply_markup=get_skip_keyboard(),
+        )
 
     await state.set_state(TransactionForm.amount)
 
@@ -171,7 +190,31 @@ async def handle_valid_amount(
             )
             await message.answer("Failed. An error has occured.")
     else:
-        ...
+        if amount is not None and message.text != SkipAnswer.SKIP:
+            await state.update_data(amount=amount)
+
+        transaction: Transaction = await state.get_value("transaction")  # type: ignore
+        data = {
+            k: v
+            for k, v in (await state.get_data()).items()
+            if k not in ("user_id", "mode", "transaction")
+        }
+        data["id"] = transaction.id
+
+        aiogram_logger.info(f"Confirm transaction edit: {data.get("user_id")}")
+
+        try:
+            usecase = EditTransactionUsecase()
+            await usecase.execute(**data)
+            await message.answer("👍", reply_markup=ReplyKeyboardRemove())
+        except Exception:
+            aiogram_logger.info(
+                f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
+            )
+            await message.answer(
+                "Failed. You must specify at least 1 field.",
+                reply_markup=ReplyKeyboardRemove(),
+            )
 
     await state.clear()
 

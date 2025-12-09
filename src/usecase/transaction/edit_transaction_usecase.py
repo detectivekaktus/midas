@@ -52,7 +52,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         app_logger.debug(f"Started `EditTransactionUsecase` execution: {id}")
 
         fields = {
-            "transaction_type": transaction_type,
+            "transaction_type_id": transaction_type,
             "title": title,
             "amount": amount,
             "description": description,

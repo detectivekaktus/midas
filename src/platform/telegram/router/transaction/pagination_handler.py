@@ -9,6 +9,7 @@ from src.loggers import aiogram_logger
 
 from src.db.schemas.transaction import Transaction
 from src.db.schemas.user import User
+from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from src.usecase.transaction import DeleteTransactionUsecase, GetTransactionsUsecase
 from src.util.enums import Currency, TransactionType
 
@@ -17,7 +18,11 @@ from src.platform.telegram.keyboard.inline.transaction import (
     TransactionPaginationCommand,
     get_transaction_pagination_inline_keyboard,
 )
-from src.platform.telegram.state.transaction import TransactionPaginationState
+from src.platform.telegram.state import FormMode
+from src.platform.telegram.state.transaction import (
+    TransactionForm,
+    TransactionPaginationState,
+)
 
 
 router = Router(name=__name__)
@@ -164,9 +169,14 @@ async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) 
     user: User = data["user"]
     current: int = data["current"]
     transactions: list[Transaction] = data["transactions"]
+    transaction: Transaction = transactions[current]
+
+    aiogram_logger.info(
+        f"Received transaction delete command: {user.id} - {transaction.id}"
+    )
 
     usecase = DeleteTransactionUsecase()
-    await usecase.execute(cast(UUID, transactions[current].id))
+    await usecase.execute(cast(UUID, transaction.id))
 
     message = query.message
     if not message or isinstance(message, InaccessibleMessage):
@@ -184,6 +194,42 @@ async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) 
     await state.update_data(current=current, transactions=transactions)
 
     await answer_query(query, transactions[current], Currency(user.currency_id))
+
+
+@router.callback_query(
+    TransactionPaginationCommand.filter(F.command == PaginationCommand.EDIT),
+    TransactionPaginationState.show,
+)
+async def handle_edit_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+
+    mode: FormMode = "edit"
+    user: User = data["user"]
+    transactions: Sequence[Transaction] = data["transactions"]  # type: ignore
+    current: int = data["current"]
+    transaction: Transaction = transactions[current]
+
+    aiogram_logger.info(
+        f"Received transaction edit command: {user.id} - {transaction.id}"
+    )
+    await state.clear()
+
+    await state.set_state(TransactionForm.transaction_type)
+    await state.update_data(user_id=user.id, mode=mode, transaction=transaction)
+
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
+        return
+
+    transaction_type: str = TransactionType(transaction.transaction_type_id).readable()
+    await query.answer()
+    await message.answer(
+        f"What's the new transaction type? (current: {transaction_type})",
+        reply_markup=get_transaction_type_keyboard(skippable=True),
+    )
+    # see form_handler.py handlers
 
 
 @router.callback_query(

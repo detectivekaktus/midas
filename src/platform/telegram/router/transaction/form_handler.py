@@ -188,7 +188,7 @@ async def handle_valid_amount(
             aiogram_logger.error(
                 f"The problem to this was the following exception:\n{e}"
             )
-            await message.answer("Failed. An error has occured.")
+            await message.answer("Failed. Something wrong happened.")
     else:
         if amount is not None and message.text != SkipAnswer.SKIP:
             await state.update_data(amount=amount)
@@ -207,13 +207,21 @@ async def handle_valid_amount(
             usecase = EditTransactionUsecase()
             await usecase.execute(**data)
             await message.answer("👍", reply_markup=ReplyKeyboardRemove())
-        except Exception:
+        except ValueError:
             aiogram_logger.info(
                 f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
             )
             await message.answer(
                 "Failed. You must specify at least 1 field.",
                 reply_markup=ReplyKeyboardRemove(),
+            )
+        except Exception as e:
+            aiogram_logger.error(f"Transaction edit failed: {data}")
+            aiogram_logger.error(
+                f"The problem to this was the following exception:\n{e}"
+            )
+            await message.answer(
+                "Failed. Something wrong happened.", reply_markup=ReplyKeyboardRemove()
             )
 
     await state.clear()

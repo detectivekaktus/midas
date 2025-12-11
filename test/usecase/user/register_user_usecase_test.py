@@ -1,46 +1,39 @@
-from pytest import fixture, raises
-from sqlalchemy.orm import Session
+from pytest import mark, raises
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.account import Account
-from src.db.schemas.storage import Storage
-from src.query import Repository
-from src.db.schemas.user import User
-from src.usecase.user import RegisterUserUsecase
+from src.query.account import AccountRepository
+from src.query.storage import StorageRepository
+from src.query.user import UserRepository
 from src.util.enums import Currency, TransactionType
 
 
-@fixture
-def test_usecase(test_engine):
-    session = Session(test_engine)
-    usecase = RegisterUserUsecase(session=session)
-    return usecase
 
-
-def test_register_user(test_engine, test_usecase):
+@mark.asyncio
+async def test_register_user(test_engine, test_register_usecase):
     user_id = 123456789
     currency = Currency.EUR
-    test_usecase.execute(user_id, currency)
+    await test_register_usecase.execute(user_id, currency)
 
-    session = Session(test_engine)
-    user_repo = Repository[User, int](User, session)
-    account_repo = Repository[Account, int](Account, session)
-    storage_repo = Repository[Storage, int](Storage, session)
+    session = AsyncSession(test_engine)
+    user_repo = UserRepository(session)
+    account_repo = AccountRepository(session)
+    storage_repo = StorageRepository(session)
 
-    with session:
-        user = user_repo.get_by_id(user_id)
+    async with session:
+        user = await user_repo.get_by_id(user_id)
         assert user
         assert user.id == user_id
         assert user.currency_id == currency
 
         for i in TransactionType:
-            account = account_repo.get_by_id(i)
+            account = await account_repo.get_by_id(i)
             assert account
             assert account.user_id == user_id
             assert account.transaction_type_id == i
             assert account.credit_amount == 0
             assert account.debit_amount == 0
 
-        storage = storage_repo.get_by_id(1)
+        storage = await storage_repo.get_by_id(1)
         assert storage
         assert storage.id == 1
         assert storage.user_id == user_id
@@ -48,10 +41,11 @@ def test_register_user(test_engine, test_usecase):
         assert storage.amount == 0
 
 
-def test_register_the_same_user_twice(test_usecase):
+@mark.asyncio
+async def test_register_the_same_user_twice(test_register_usecase):
     user_id = 123456789
     currency = Currency.EUR
-    test_usecase.execute(user_id, currency)
+    await test_register_usecase.execute(user_id, currency)
 
     with raises(KeyError):
-        test_usecase.execute(user_id, currency)
+        await test_register_usecase.execute(user_id, currency)

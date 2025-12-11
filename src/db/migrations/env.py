@@ -1,5 +1,7 @@
+from asyncio import run
 from logging.config import fileConfig
 from alembic import context
+from sqlalchemy import Connection
 from src.db import Base, engine
 from src.db.schemas import *
 
@@ -50,22 +52,37 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
+def do_run_migrations(connection: Connection) -> None:
+    """
+    This is the proper method that runs the migration in
+    online mode.
+    """
+    context.configure(connection=connection, target_metadata=target_metadata)
 
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
+    with context.begin_transaction():
+        context.run_migrations()
 
+
+async def run_async_migrations() -> None:
+    """
+    Async wrapper for using the async engine from `src/db`
+    module. This function uses `run_sync()` method to run
+    the previously defined function.
     """
     connectable = engine
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+    await connectable.dispose()
 
-        with context.begin_transaction():
-            context.run_migrations()
+
+def run_migrations_online() -> None:
+    """
+    Run migrations in 'online' mode. This function
+    runs the asyncronous migration in synchronous
+    context with `asyncio.run()` function.
+    """
+    run(run_async_migrations())
 
 
 if context.is_offline_mode():

@@ -1,4 +1,4 @@
-from src.util.enums import StrCurrency
+from src.util.enums import Currency
 
 
 def get_currency_list() -> list[str]:
@@ -6,16 +6,14 @@ def get_currency_list() -> list[str]:
     Get displayed currency list.
 
     This list is made of emojis corrisponding to the
-    `StrCurrency` enum elements.
+    `Currency` enum elements.
 
     :return: list of displayable currencies.
     :rtype: list[str]
     """
     currency_map = {
-        StrCurrency.EUR: "🇪🇺",
-        StrCurrency.USD: "🇺🇸",
-        StrCurrency.UAH: "🇺🇦",
-        StrCurrency.BTC: "🌍",
-        StrCurrency.ETH: "🌏"
+        Currency.EUR: "🇪🇺",
+        Currency.USD: "🇺🇸",
+        Currency.UAH: "🇺🇦",
     }
-    return [f"{currency_map[currency]} {currency.value}" for currency in StrCurrency]
+    return [f"{currency_map[currency]} {currency.name}" for currency in Currency]

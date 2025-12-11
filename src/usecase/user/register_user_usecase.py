@@ -1,8 +1,12 @@
 from typing import override
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.query import Repository, create_session
+from src.loggers import app_logger
+
+from src.query.account import AccountRepository
+from src.query.storage import StorageRepository
+from src.query.user import UserRepository
 from src.db.schemas.account import Account
 from src.db.schemas.storage import Storage
 from src.db.schemas.user import User
@@ -10,7 +14,7 @@ from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import Currency, TransactionType
 
 
-class RegisterUserUsecase(AbstractUsecase):
+class RegisterUserUsecase(AbstractUsecase[None]):
     """
     Register user usercase. This class performs all those necessary
     operations for creating a new user, described more deeply in
@@ -18,19 +22,19 @@ class RegisterUserUsecase(AbstractUsecase):
     """
 
     @override
-    def __init__(self, session: Session | None = None) -> None:
+    def __init__(self, session: AsyncSession | None = None) -> None:
         """
         Initialize a new `RegisterUserUsecase` object.
 
         See `AbstractUsecase` for more details.
         """
-        self._session = session or create_session()
-        self._user_repo = Repository[User, int](User, self._session)
-        self._account_repo = Repository[Account, int](Account, self._session)
-        self._storage_repo = Repository[Storage, int](Storage, self._session)
+        super().__init__(session)
+        self._user_repo = UserRepository(self._session)
+        self._account_repo = AccountRepository(self._session)
+        self._storage_repo = StorageRepository(self._session)
 
     @override
-    def execute(self, user_id: int, currency: Currency) -> None:
+    async def execute(self, user_id: int, currency: Currency) -> None:
         """
         Register a new user and data relative to them in the database.
 
@@ -46,9 +50,14 @@ class RegisterUserUsecase(AbstractUsecase):
 
         :raise KeyError: if user with `user_id` already exists.
         """
-        with self._session:
-            user = self._user_repo.get_by_id(user_id)
+        app_logger.debug("Started `RegisterUserUsecase` execution")
+
+        async with self._session:
+            user = await self._user_repo.get_by_id(user_id)
             if user is not None:
+                app_logger.debug(
+                    "Finished `RegisterUserUsecase` execution too soon because user already exists"
+                )
                 raise KeyError("User already exists")
 
             user = User(id=user_id, currency_id=currency)
@@ -59,7 +68,7 @@ class RegisterUserUsecase(AbstractUsecase):
                 for type_id in TransactionType
             ]
             self._account_repo.add_many(accounts)
-            self._account_repo.flush()
+            await self._account_repo.flush()
 
             income_account = next(
                 acc
@@ -69,4 +78,6 @@ class RegisterUserUsecase(AbstractUsecase):
             storage = Storage(user_id=user_id, account_id=income_account.id)
             self._storage_repo.add(storage)
 
-            self._session.commit()
+            await self._session.commit()
+
+        app_logger.debug("Successfully registered a user")

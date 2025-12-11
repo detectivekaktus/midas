@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 from os import getenv
 from sys import stderr
 from typing import Optional
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.asyncio import create_async_engine
 
 load_dotenv()
 _POSTGRES_USER: Optional[str] = getenv("POSTGRES_USER")
@@ -27,8 +26,8 @@ if (
     exit(1)
 
 # https://docs.sqlalchemy.org/en/20/tutorial/engine.html#tutorial-engine
-engine = create_engine(
-    f"postgresql+psycopg2://{_POSTGRES_USER}:{_POSTGRES_PASSWORD}@{_POSTGRES_HOST}:{_POSTGRES_PORT}/{_POSTGRES_DB}",
+engine = create_async_engine(
+    f"postgresql+asyncpg://{_POSTGRES_USER}:{_POSTGRES_PASSWORD}@{_POSTGRES_HOST}:{_POSTGRES_PORT}/{_POSTGRES_DB}",
     echo=getenv("SQLALCHEMY_ECHO", "False").lower() in ("true", "1"),
 )
 

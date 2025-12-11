@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+from decimal import Decimal
 from sqlalchemy import TIMESTAMP, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
@@ -30,7 +30,7 @@ class Event(Base):
     )
     title: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(256), nullable=True)
-    amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     last_run_at = mapped_column(TIMESTAMP(timezone=True), nullable=False)
     interval: Mapped[int] = mapped_column(Integer, nullable=False)
     next_run_at = mapped_column(TIMESTAMP(timezone=True), nullable=False)

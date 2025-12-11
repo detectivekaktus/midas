@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+from decimal import Decimal
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db import Base
@@ -19,11 +19,13 @@ class Account(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    transaction_type_id: Mapped[int] = mapped_column(ForeignKey("transaction_types.id"), nullable=False)
-    debit_amount: Mapped[float] = mapped_column(
+    transaction_type_id: Mapped[int] = mapped_column(
+        ForeignKey("transaction_types.id"), nullable=False
+    )
+    debit_amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=0, nullable=False
     )
-    credit_amount: Mapped[float] = mapped_column(
+    credit_amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2), default=0, nullable=False
     )
 
@@ -38,7 +40,7 @@ class Account(Base):
         foreign_keys="[Transaction.credit_account_id]",
         back_populates="credit_account",
     )
-    storage = relationship("Storage", back_populates="account")
+    storage = relationship("Storage", back_populates="account", uselist=False)
     transaction_type = relationship("TransactionType", back_populates="accounts")
 
     def __repr__(self) -> str:

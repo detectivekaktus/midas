@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.query.session import create_session
 
 
-class AbstractUsecase(ABC):
+class AbstractUsecase[T](ABC):
     """
     Abstract usecase class. All concrete usecases must inherit
     from this class and implement its `execute()` method which
@@ -14,24 +16,29 @@ class AbstractUsecase(ABC):
     most cases you would need to specify at least one repository
     in the initializer.
 
+    The generic `T` type represents the return type of `exeucte()`
+    method and in most of the cases is equal to `None`.
+
     :example:
-    >>> repo = Repository(User)
-    >>> usecase = RegisterUserUsecase(repo)
+    >>> usecase = RegisterUserUsecase()
     >>> usecase.execute()
     """
 
-    def __init__(self, session: Optional[Session] = None) -> None:
+    def __init__(self, session: Optional[AsyncSession] = None) -> None:
         """
         Initialize a new Usecase object.
 
         Note that `session` argument is here only for testing
         purposes and must be left blank when this class is used
         in production.
+
+        :param session: testing session.
+        :type session: Optional[AsyncSession]
         """
-        ...
+        self._session = session or create_session()
 
     @abstractmethod
-    def execute(self, *args, **kwargs) -> None:
+    async def execute(self, *args, **kwargs) -> T:
         """
         Execute the usecase business logic.
         """

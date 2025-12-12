@@ -56,7 +56,9 @@ class TransactionRepository(
                         selectinload(Transaction.debit_account).selectinload(
                             Account.storage
                         ),
-                        selectinload(Transaction.credit_account),
+                        selectinload(Transaction.credit_account).selectinload(
+                            Account.storage
+                        ),
                     )
                 )
             ).one_or_none()

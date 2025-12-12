@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Any, Optional, override
 from uuid import UUID
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.loggers import app_logger
@@ -133,7 +134,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
 
         transaction.debit_account_id = expense_account.id
 
-    async def _change_expense_to_income(
+    def _change_expense_to_income(
         self, transaction: Transaction, new_transaction_type: TransactionType
     ) -> None:
         """
@@ -168,6 +169,22 @@ class EditTransactionUsecase(AbstractUsecase[None]):
 
         transaction.debit_account_id = income_account.id
         transaction.credit_account_id = None
+
+    def _change_amount(self, transaction: Transaction, new_amount: Decimal) -> None:
+        diff = transaction.amount - new_amount
+
+        debit_account: Account = transaction.debit_account
+        debit_account.debit_amount -= diff
+
+        if transaction.transaction_type_id == TransactionType.INCOME:
+            storage: Storage = debit_account.storage
+            storage.amount -= diff
+        else:
+            credit_account: Account = transaction.credit_account
+            credit_account.credit_amount -= diff
+
+            storage: Storage = credit_account.storage
+            storage.amount += diff
 
     @override
     async def execute(
@@ -211,23 +228,26 @@ class EditTransactionUsecase(AbstractUsecase[None]):
 
             if "transaction_type_id" in updates:
                 new_transaction_type = updates["transaction_type_id"]
-
-                # Expense -> Income
                 if transaction.transaction_type_id == TransactionType.INCOME:
                     await self._change_income_to_expense(
                         transaction, new_transaction_type
                     )
-                # Expense -> Expense
                 elif new_transaction_type != TransactionType.INCOME:
                     await self._change_expense_to_expense(
                         transaction, new_transaction_type
                     )
-                # Expense -> Income
                 else:
-                    await self._change_expense_to_income(
-                        transaction, new_transaction_type
-                    )
+                    self._change_expense_to_income(transaction, new_transaction_type)
+                updates.pop("transaction_type_id")
 
+            if "amount" in updates:
+                new_amount = updates["amount"]
+                self._change_amount(transaction, new_amount)
+                updates.pop("amount")
+
+            await self._session.execute(
+                update(Transaction).where(Transaction.id == id).values(**updates)
+            )
             await self._session.commit()
 
         app_logger.debug(f"Successfully edited the transaction: {id}")

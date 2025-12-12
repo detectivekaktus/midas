@@ -1,12 +1,15 @@
 from decimal import Decimal
-from typing import Optional, override
+from typing import Any, Optional, override
 from uuid import UUID
-from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.loggers import app_logger
 
+from src.db.schemas.account import Account
+from src.db.schemas.storage import Storage
 from src.db.schemas.transaction import Transaction
+from src.query.account import AccountRepository
+from src.query.transaction import TransactionRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import TransactionType
 
@@ -20,6 +23,151 @@ class EditTransactionUsecase(AbstractUsecase[None]):
     @override
     def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
+        self._transaction_repo = TransactionRepository(self._session)
+        self._account_repo = AccountRepository(self._session)
+
+    def _get_effective_updates(
+        self,
+        transaction: Transaction,
+        transaction_type: Optional[TransactionType],
+        title: Optional[str],
+        amount: Optional[Decimal],
+        description: Optional[str],
+    ) -> dict[str, Any]:
+        """
+        Get effective updates against the transaction.
+
+        Any `None` fields aren't counter as well as any identical fields.
+
+        :raise ValueError: if all optional fields are `None` or if changes
+        are identical to source transaction.
+        """
+        fields = {
+            "transaction_type_id": transaction_type,
+            "title": title,
+            "amount": amount,
+            "description": description,
+        }
+
+        updates = {
+            k: v
+            for k, v in fields.items()
+            if v is not None and getattr(transaction, k, v) != v
+        }
+        if len(updates) == 0:
+            raise ValueError("No valid updates found")
+
+        return updates
+
+    async def _change_income_to_expense(
+        self, transaction: Transaction, new_transaction_type: TransactionType
+    ) -> None:
+        """
+        Current state
+        +----------+-------+--------+
+        | Account  | Debit | Credit |
+        +----------+-------+--------+
+        | Income   | X     |        |
+        |          |       |        |
+        +----------+-------+--------+
+
+        Desired state
+        +----------+-------+--------+
+        | Account  | Debit | Credit |
+        +----------+-------+--------+
+        | Expense  | X     |        |
+        | Income   |       | X      |
+        +----------+-------+--------+
+        """
+        transaction.transaction_type_id = new_transaction_type
+
+        income_account: Account = transaction.debit_account
+        income_account.debit_amount -= transaction.amount
+        income_account.credit_amount += transaction.amount
+
+        # 0 -> x -> -x
+        storage: Storage = income_account.storage
+        storage.amount -= transaction.amount * 2
+
+        expense_account: Account = (
+            await self._account_repo.get_user_account_by_transaction_type(
+                transaction.user_id, new_transaction_type
+            )
+        )  # type: ignore
+        expense_account.debit_amount += transaction.amount
+
+        transaction.debit_account_id = expense_account.id
+        transaction.credit_account_id = income_account.id
+
+    async def _change_expense_to_expense(
+        self, transaction: Transaction, new_transaction_type: TransactionType
+    ) -> None:
+        """
+        Current state
+        +-----------+-------+--------+
+        | Account   | Debit | Credit |
+        +-----------+-------+--------+
+        | Expense A | X     |        |
+        | Income    |       | X      |
+        +-----------+-------+--------+
+
+        Desired state
+        +-----------+-------+--------+
+        | Account   | Debit | Credit |
+        +-----------+-------+--------+
+        | Expense B | X     |        |
+        | Income    |       | X      |
+        +-----------+-------+--------+
+        """
+        transaction.transaction_type_id = new_transaction_type
+
+        debit_account: Account = transaction.debit_account
+        debit_account.debit_amount -= transaction.amount
+
+        expense_account: Account = (
+            await self._account_repo.get_user_account_by_transaction_type(
+                transaction.user_id, new_transaction_type
+            )
+        )  # type: ignore
+        expense_account.debit_amount += transaction.amount
+
+        transaction.debit_account_id = expense_account.id
+
+    async def _change_expense_to_income(
+        self, transaction: Transaction, new_transaction_type: TransactionType
+    ) -> None:
+        """
+        Current state
+        +----------+-------+--------+
+        | Account  | Debit | Credit |
+        +----------+-------+--------+
+        | Expense  | X     |        |
+        | Income   |       | X      |
+        +----------+-------+--------+
+
+        Desired state
+        +---------+-------+--------+
+        | Account | Debit | Credit |
+        +---------+-------+--------+
+        | Income  | X     |        |
+        |         |       |        |
+        +---------+-------+--------+
+        """
+        transaction.transaction_type_id = new_transaction_type
+
+        expense_account: Account = transaction.debit_account
+        expense_account.debit_amount -= transaction.amount
+
+        income_account: Account = transaction.debit_account
+        income_account.credit_amount -= transaction.amount
+        income_account.debit_amount += transaction.amount
+
+        # 0 -> -x -> x
+        storage: Storage = income_account.storage
+        storage.amount += transaction.amount * 2
+
+        transaction.debit_account_id = income_account.id
+        transaction.credit_account_id = None
 
     @override
     async def execute(
@@ -47,25 +195,39 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         :param description: transaction description
         :type description: Optional[str]
 
-        :raise ValueError: if all optional fields are `None`.
+        :raise ValueError: if all optional fields are `None`, identical to source
+        transaction, or if no transaction is bound to `id`.
         """
         app_logger.debug(f"Started `EditTransactionUsecase` execution: {id}")
 
-        fields = {
-            "transaction_type_id": transaction_type,
-            "title": title,
-            "amount": amount,
-            "description": description,
-        }
-
-        updates = {k: v for k, v in fields.items() if v is not None}
-        if len(updates) == 0:
-            raise ValueError("Expected at least one optional field")
-
         async with self._session:
-            await self._session.execute(
-                update(Transaction).where(Transaction.id == id).values(**updates)
+            transaction = await self._transaction_repo.get_by_id(id, eager=True)
+            if transaction is None:
+                raise ValueError(f"No transaction with {id} found")
+
+            updates = self._get_effective_updates(
+                transaction, transaction_type, title, amount, description
             )
+
+            if "transaction_type_id" in updates:
+                new_transaction_type = updates["transaction_type_id"]
+
+                # Expense -> Income
+                if transaction.transaction_type_id == TransactionType.INCOME:
+                    await self._change_income_to_expense(
+                        transaction, new_transaction_type
+                    )
+                # Expense -> Expense
+                elif new_transaction_type != TransactionType.INCOME:
+                    await self._change_expense_to_expense(
+                        transaction, new_transaction_type
+                    )
+                # Expense -> Income
+                else:
+                    await self._change_expense_to_income(
+                        transaction, new_transaction_type
+                    )
+
             await self._session.commit()
 
         app_logger.debug(f"Successfully edited the transaction: {id}")

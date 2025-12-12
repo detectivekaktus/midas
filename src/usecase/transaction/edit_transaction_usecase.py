@@ -186,6 +186,8 @@ class EditTransactionUsecase(AbstractUsecase[None]):
             storage: Storage = credit_account.storage
             storage.amount += diff
 
+        transaction.amount -= diff
+
     @override
     async def execute(
         self,

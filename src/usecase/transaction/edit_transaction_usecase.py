@@ -1,7 +1,6 @@
 from decimal import Decimal
 from typing import Any, Optional, override
 from uuid import UUID
-from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.loggers import app_logger
@@ -159,7 +158,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         expense_account: Account = transaction.debit_account
         expense_account.debit_amount -= transaction.amount
 
-        income_account: Account = transaction.debit_account
+        income_account: Account = transaction.credit_account
         income_account.credit_amount -= transaction.amount
         income_account.debit_amount += transaction.amount
 
@@ -247,9 +246,9 @@ class EditTransactionUsecase(AbstractUsecase[None]):
                 self._change_amount(transaction, new_amount)
                 updates.pop("amount")
 
-            await self._session.execute(
-                update(Transaction).where(Transaction.id == id).values(**updates)
-            )
+            for k, v in updates.items():
+                setattr(transaction, k, v)
+
             await self._session.commit()
 
         app_logger.debug(f"Successfully edited the transaction: {id}")

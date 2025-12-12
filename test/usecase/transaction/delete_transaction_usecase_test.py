@@ -2,6 +2,9 @@ from decimal import Decimal
 from pytest import fixture, mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.db.schemas.storage import Storage
+from src.query.account.repository import AccountRepository
+from src.query.storage.repository import StorageRepository
 from src.usecase.transaction import DeleteTransactionUsecase
 from src.util.enums import Currency, TransactionType
 
@@ -15,6 +18,7 @@ def test_delete_transaction(test_engine) -> DeleteTransactionUsecase:
 
 @mark.asyncio
 async def test_create_income_transaction_and_delete_it(
+    test_engine,
     test_register_usecase,
     test_create_transaction,
     test_get_transactions,
@@ -38,9 +42,24 @@ async def test_create_income_transaction_and_delete_it(
     transactions = await test_get_transactions.execute(user_id)
     assert len(transactions) == 0
 
+    session = AsyncSession(test_engine)
+    account_repo = AccountRepository(session=session)
+    async with session:
+        income_account = await account_repo.get_user_account_by_transaction_type(
+            user_id, TransactionType.INCOME, eager=True
+        )
+        assert income_account is not None
+        assert income_account.debit_amount == Decimal()
+        assert income_account.credit_amount == Decimal()
+
+        storage: Storage = income_account.storage
+        assert storage is not None
+        assert storage.amount == Decimal()
+
 
 @mark.asyncio
 async def test_add_4_transactions_and_delete_them(
+    test_engine,
     test_register_usecase,
     test_create_transaction,
     test_get_transactions,
@@ -90,3 +109,21 @@ async def test_add_4_transactions_and_delete_them(
 
     transactions = await test_get_transactions.execute(user_id)
     assert len(transactions) == 0
+
+    session = AsyncSession(test_engine)
+    account_repo = AccountRepository(session=session)
+    storage_repo = StorageRepository(session=session)
+    async with session:
+        for type_ in TransactionType:
+            account = await account_repo.get_user_account_by_transaction_type(
+                user_id, type_, eager=True
+            )
+
+            assert account is not None
+            assert account.debit_amount == Decimal()
+            assert account.credit_amount == Decimal()
+
+        storage = await storage_repo.get_by_id(1)
+
+        assert storage is not None
+        assert storage.amount == Decimal()

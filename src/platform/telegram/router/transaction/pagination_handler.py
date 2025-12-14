@@ -55,10 +55,10 @@ def render_transaction(transaction: Transaction, currency: Currency) -> str:
     """
     type_ = TransactionType(transaction.transaction_type_id).readable()
     description = transaction.description
-    date = transaction.created_at.strftime("%d/%m/%Y")  # 25/12/2025
+    creation_date = transaction.created_at.strftime("%d/%m/%Y")  # 25/12/2025
 
     text = (
-        f"📅 {date}\n"
+        f"📅 {creation_date}{html.italic(" - Edited") if transaction.updated_at is not None else ""}\n"
         f"📌 {transaction.title}\n"
         f"💳 {type_}\n"
         f"📝 {description if description else html.italic("No description provided")}\n"

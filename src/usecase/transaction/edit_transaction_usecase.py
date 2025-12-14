@@ -96,8 +96,8 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         )  # type: ignore
         expense_account.debit_amount += transaction.amount
 
-        transaction.debit_account_id = expense_account.id
-        transaction.credit_account_id = income_account.id
+        transaction.debit_account = expense_account
+        transaction.credit_account = income_account
 
     async def _change_expense_to_expense(
         self, transaction: Transaction, new_transaction_type: TransactionType
@@ -131,7 +131,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         )  # type: ignore
         expense_account.debit_amount += transaction.amount
 
-        transaction.debit_account_id = expense_account.id
+        transaction.debit_account = expense_account
 
     def _change_expense_to_income(
         self, transaction: Transaction, new_transaction_type: TransactionType
@@ -166,8 +166,8 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         storage: Storage = income_account.storage
         storage.amount += transaction.amount * 2
 
-        transaction.debit_account_id = income_account.id
-        transaction.credit_account_id = None
+        transaction.debit_account = income_account
+        transaction.credit_account = None
 
     def _change_amount(self, transaction: Transaction, new_amount: Decimal) -> None:
         diff = transaction.amount - new_amount

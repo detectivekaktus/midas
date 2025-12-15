@@ -121,7 +121,7 @@ async def handle_transactions_command(
 )
 async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
-    user: User = data["user"]
+    user: CachedUser = data["user"]
     current: int = data["current"]
     max_transactions: int = data["max_transactions"]
     transactions: Sequence[Transaction] = data["transactions"]
@@ -147,7 +147,7 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
 )
 async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
-    user: User = data["user"]
+    user: CachedUser = data["user"]
     current: int = data["current"]
     transactions: Sequence[Transaction] = data["transactions"]
 
@@ -167,7 +167,7 @@ async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) ->
 )
 async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
-    user: User = data["user"]
+    user: CachedUser = data["user"]
     current: int = data["current"]
     transactions: list[Transaction] = data["transactions"]
     transaction: Transaction = transactions[current]
@@ -205,7 +205,7 @@ async def handle_edit_callback_query(query: CallbackQuery, state: FSMContext) ->
     data = await state.get_data()
 
     mode: FormMode = "edit"
-    user: User = data["user"]
+    user: CachedUser = data["user"]
     transactions: Sequence[Transaction] = data["transactions"]  # type: ignore
     current: int = data["current"]
     transaction: Transaction = transactions[current]

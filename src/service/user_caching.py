@@ -36,8 +36,8 @@ class UserCacheStorage:
 
         :param id: user's telegram id
         :type id: int
-        :return: user sqlalchemy instance
-        :rtype: User
+        :return: cached user instance
+        :rtype: CachedUser
         :raise KeyError: if no user with `id` is cached.
         """
         return self._cache[id]

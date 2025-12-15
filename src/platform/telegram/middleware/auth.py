@@ -4,7 +4,9 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, Message
 
 from src.loggers import aiogram_logger
+from src.services import user_storage
 
+from src.db.schemas.user import User
 from src.usecase.user import GetUserUsecase
 
 
@@ -48,7 +50,15 @@ class AuthMiddleware(BaseMiddleware):
             )
             return
 
-        user = await self._usecase.execute(telegram_user.id)
+        user = (
+            await user_storage.get(telegram_user.id)
+            if await user_storage.exists(telegram_user.id)
+            else await self._usecase.execute(telegram_user.id)
+        )
+        if isinstance(user, User):
+            aiogram_logger.info(f"Got request from uncached user {user.id}. Caching.")
+            user = await user_storage.store(user)
+
         # If user is not registered and has sent a command and that command is not allowed.
         if user is None and (text.startswith("/") and (text not in AllowedCommand)):
             await event.answer(

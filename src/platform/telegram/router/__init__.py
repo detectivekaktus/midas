@@ -3,13 +3,18 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
+from src.loggers import aiogram_logger
+from src.service.user_caching import CachedUser
+
 
 router = Router(name=__name__)
 
 
 @router.message(Command("cancel"))
 @router.message(F.text.casefold() == "cancel")
-async def handle_global_cancel(message: Message, state: FSMContext) -> None:
+async def handle_global_cancel(
+    message: Message, state: FSMContext, user: CachedUser
+) -> None:
     """
     Allow user to cancel any state action.
     """
@@ -17,6 +22,7 @@ async def handle_global_cancel(message: Message, state: FSMContext) -> None:
     if current_state is None:
         return
 
+    aiogram_logger.info(f"Canceled current action {user.id}.")
     await state.clear()
     await message.answer(
         "Cancelled.",

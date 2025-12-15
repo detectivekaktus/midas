@@ -6,13 +6,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InaccessibleMessage, Message
 
 from src.loggers import aiogram_logger
+from src.service.user_caching import CachedUser
 
 from src.db.schemas.transaction import Transaction
 from src.db.schemas.user import User
-from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from src.usecase.transaction import DeleteTransactionUsecase, GetTransactionsUsecase
 from src.util.enums import Currency, TransactionType
 
+from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from src.platform.telegram.keyboard.inline.transaction import (
     Command as PaginationCommand,
     TransactionPaginationCommand,
@@ -88,7 +89,7 @@ async def answer_query(
 
 @router.message(Command("transactions"))
 async def handle_transactions_command(
-    message: Message, state: FSMContext, user: User
+    message: Message, state: FSMContext, user: CachedUser
 ) -> None:
     aiogram_logger.info(f"Received `/transactions` command: {user.id}")
 

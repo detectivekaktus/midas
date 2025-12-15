@@ -1,4 +1,11 @@
+from dataclasses import dataclass
 from src.db.schemas.user import User
+
+
+@dataclass
+class CachedUser:
+    id: int
+    currency_id: int
 
 
 class UserCacheStorage:
@@ -8,18 +15,22 @@ class UserCacheStorage:
     """
 
     def __init__(self) -> None:
-        self._cache: dict[int, User] = {}
+        self._cache: dict[int, CachedUser] = {}
 
-    async def store(self, user: User) -> None:
+    async def store(self, user: User) -> CachedUser:
         """
         Cache user.
 
         :param user: user sqlalchemy instance
         :type user: User
+        :return: Cached version of user
+        :rtype: CachedUser
         """
-        self._cache[user.id] = user
+        cached_user = CachedUser(user.id, user.currency_id)
+        self._cache[cached_user.id] = cached_user
+        return cached_user
 
-    async def get(self, id: int) -> User:
+    async def get(self, id: int) -> CachedUser:
         """
         Get cached user.
 

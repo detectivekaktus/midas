@@ -6,9 +6,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 from src.loggers import aiogram_logger
+from src.service.user_caching import CachedUser
 
 from src.db.schemas.transaction import Transaction
-from src.db.schemas.user import User
 from src.usecase.transaction import CreateTransactionUsecase, EditTransactionUsecase
 from src.util.enums import TransactionType
 
@@ -55,7 +55,7 @@ async def skipped_unskippable(
 
 @router.message(Command("add_transaction"))
 async def handle_add_transaction_command(
-    message: Message, state: FSMContext, user: User
+    message: Message, state: FSMContext, user: CachedUser
 ) -> None:
     aiogram_logger.info(f"Received `/add_transaction` command: {user.id}")
 

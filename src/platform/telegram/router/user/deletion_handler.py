@@ -12,16 +12,21 @@ from src.usecase.user import DeleteUserUsecase
 from src.platform.telegram.validator import YesNoAnswer
 from src.platform.telegram.keyboard import get_yes_no_keyboard
 from src.platform.telegram.state import ConfirmForm
+from src.platform.telegram.util.menu.events import remove_menu
+from src.platform.telegram.util.menu.options import ProfileMenuOption
 
 
 router = Router(name=__name__)
 
 
 @router.message(Command("delete_profile"))
+@router.message(F.text == ProfileMenuOption.DELETE_PROFILE)
 async def handle_delete_profile(
     message: Message, state: FSMContext, user: CachedUser
 ) -> None:
     aiogram_logger.info(f"Received `/delete_profile` command: {user.id}")
+
+    await remove_menu(message, state)
 
     await state.set_state(ConfirmForm.confirm)
     await state.update_data(user_id=user.id)

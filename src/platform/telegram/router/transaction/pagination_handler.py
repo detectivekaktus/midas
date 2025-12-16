@@ -30,6 +30,8 @@ from src.platform.telegram.state.transaction import (
     TransactionPaginationState,
 )
 from src.platform.telegram.validator import YesNoAnswer
+from src.platform.telegram.util.menu.events import remove_menu, send_main_menu
+from src.platform.telegram.util.menu.options import TransactionsMenuOption
 
 
 router = Router(name=__name__)
@@ -94,6 +96,7 @@ async def answer_query(
 
 
 @router.message(Command("transactions"))
+@router.message(F.text == TransactionsMenuOption.VIEW)
 async def handle_transactions_command(
     message: Message, state: FSMContext, user: CachedUser
 ) -> None:
@@ -106,6 +109,8 @@ async def handle_transactions_command(
     if len(transactions) == 0:
         await message.answer("Nothing to display ☹️")
         return
+
+    await remove_menu(message, state)
 
     await state.update_data(
         user=user,
@@ -294,8 +299,8 @@ async def handle_exit_callback_query(query: CallbackQuery, state: FSMContext) ->
     await query.answer()
 
     message = query.message
-    if not message:
+    if not message or isinstance(message, InaccessibleMessage):
         aiogram_logger.warning("Couldn't find message bound to the callback query.")
         return
 
-    await message.answer("👍")
+    await send_main_menu(message, state, "👍")

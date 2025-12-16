@@ -18,6 +18,8 @@ from src.platform.telegram.state import FormMode
 from src.platform.telegram.state.transaction import TransactionForm
 from src.platform.telegram.validator import SkipAnswer, amount_filter
 from src.platform.telegram.validator.transaction import valid_transaction_type_filter
+from src.platform.telegram.util.menu.events import remove_menu, send_transactions_menu
+from src.platform.telegram.util.menu.options import TransactionsMenuOption
 
 
 router = Router(name=__name__)
@@ -54,10 +56,13 @@ async def skipped_unskippable(
 
 
 @router.message(Command("add_transaction"))
+@router.message(F.text == TransactionsMenuOption.ADD)
 async def handle_add_transaction_command(
     message: Message, state: FSMContext, user: CachedUser
 ) -> None:
     aiogram_logger.info(f"Received `/add_transaction` command: {user.id}")
+
+    await remove_menu(message, state)
 
     mode: FormMode = "create"
     await state.update_data(user_id=user.id, mode=mode)
@@ -181,14 +186,16 @@ async def handle_valid_amount(
         try:
             usecase = CreateTransactionUsecase()
             await usecase.execute(**data)
-            await message.answer("👍")
+            await send_transactions_menu(message, state, "👍")
         except Exception as e:
             # Should be unreachable.
             aiogram_logger.error(f"Transaction creation failed: {data}")
             aiogram_logger.error(
                 f"The problem to this was the following exception:\n{e}"
             )
-            await message.answer("Failed. Something wrong happened.")
+            await send_transactions_menu(
+                message, state, "Failed. Something wrong happened."
+            )
     else:
         if amount is not None and message.text != SkipAnswer.SKIP:
             await state.update_data(amount=amount)
@@ -206,22 +213,21 @@ async def handle_valid_amount(
         try:
             usecase = EditTransactionUsecase()
             await usecase.execute(**data)
-            await message.answer("👍", reply_markup=ReplyKeyboardRemove())
+            await send_transactions_menu(message, state, "👍")
         except ValueError:
             aiogram_logger.info(
                 f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
             )
-            await message.answer(
-                "Failed. You must specify at least 1 field.",
-                reply_markup=ReplyKeyboardRemove(),
+            await send_transactions_menu(
+                message, state, "Failed. You must specify at least 1 field."
             )
         except Exception as e:
             aiogram_logger.error(f"Transaction edit failed: {data}")
             aiogram_logger.error(
                 f"The problem to this was the following exception:\n{e}"
             )
-            await message.answer(
-                "Failed. Something wrong happened.", reply_markup=ReplyKeyboardRemove()
+            await send_transactions_menu(
+                message, state, "Failed. Something wrong happened."
             )
 
     await state.clear()

@@ -11,6 +11,7 @@ from src.usecase.user import RegisterUserUsecase
 from src.platform.telegram.validator.currency import valid_currency_filter
 from src.platform.telegram.keyboard.currency import get_currency_keyboard
 from src.platform.telegram.state.user import UserRegistrationForm
+from src.platform.telegram.util.menu.events import send_main_menu
 
 
 router = Router(name=__name__)
@@ -45,9 +46,7 @@ async def handle_currency(
     try:
         usecase = RegisterUserUsecase()
         await usecase.execute(**data)
-        await message.answer(
-            "You've been successfully registered 🥳", reply_markup=ReplyKeyboardRemove()
-        )
+        await send_main_menu(message, state, "You've been successfully registered 🥳")
     except KeyError:
         aiogram_logger.warning(
             "Auth middleware malfunction. "

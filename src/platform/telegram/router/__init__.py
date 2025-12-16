@@ -1,11 +1,12 @@
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 
 from src.loggers import aiogram_logger
 from src.service.user_caching import CachedUser
 
+from src.platform.telegram.util.menu.events import send_main_menu
 
 router = Router(name=__name__)
 
@@ -23,7 +24,4 @@ async def handle_global_cancel(
         aiogram_logger.info(f"Canceled current action {user.id}.")
         await state.clear()
 
-    await message.answer(
-        "Canceled.",
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    await send_main_menu(message, state)

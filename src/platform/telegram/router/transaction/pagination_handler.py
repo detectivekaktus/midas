@@ -3,16 +3,21 @@ from uuid import UUID
 from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, InaccessibleMessage, Message
+from aiogram.types import (
+    CallbackQuery,
+    InaccessibleMessage,
+    Message,
+    ReplyKeyboardRemove,
+)
 
 from src.loggers import aiogram_logger
 from src.service.user_caching import CachedUser
 
 from src.db.schemas.transaction import Transaction
-from src.db.schemas.user import User
 from src.usecase.transaction import DeleteTransactionUsecase, GetTransactionsUsecase
 from src.util.enums import Currency, TransactionType
 
+from src.platform.telegram.keyboard import get_yes_no_keyboard
 from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from src.platform.telegram.keyboard.inline.transaction import (
     Command as PaginationCommand,
@@ -24,6 +29,7 @@ from src.platform.telegram.state.transaction import (
     TransactionForm,
     TransactionPaginationState,
 )
+from src.platform.telegram.validator import YesNoAnswer
 
 
 router = Router(name=__name__)
@@ -166,18 +172,7 @@ async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) ->
     TransactionPaginationState.show,
 )
 async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) -> None:
-    data = await state.get_data()
-    user: CachedUser = data["user"]
-    current: int = data["current"]
-    transactions: list[Transaction] = data["transactions"]
-    transaction: Transaction = transactions[current]
-
-    aiogram_logger.info(
-        f"Received transaction delete command: {user.id} - {transaction.id}"
-    )
-
-    usecase = DeleteTransactionUsecase()
-    await usecase.execute(cast(UUID, transaction.id))
+    await state.set_state(TransactionPaginationState.confirm_delete)
 
     message = query.message
     if not message or isinstance(message, InaccessibleMessage):
@@ -185,16 +180,73 @@ async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) 
         await query.answer("If you see this message, report a bug on github.")
         return
 
+    await query.answer()
+    await message.answer(
+        "⚠️ Are you sure you want to delete this transaction?",
+        reply_markup=get_yes_no_keyboard(),
+    )
+
+
+@router.message(TransactionPaginationState.confirm_delete, F.text == YesNoAnswer.YES)
+async def handle_confirm_delete_callback_query(
+    message: Message, state: FSMContext
+) -> None:
+    data = await state.get_data()
+    user: CachedUser = data["user"]
+    current: int = data["current"]
+    transactions: list[Transaction] = data["transactions"]
+    deleted_transaction: Transaction = transactions[current]
+
+    aiogram_logger.info(
+        f"Received transaction delete command: {user.id} - {deleted_transaction.id}"
+    )
+
+    usecase = DeleteTransactionUsecase()
+    await usecase.execute(cast(UUID, deleted_transaction.id))
+
     if len(transactions) == 1:
         await state.clear()
-        await message.edit_text(text="Nothing to display ☹️")
+        await message.answer(
+            text="Nothing to display ☹️", reply_markup=ReplyKeyboardRemove()
+        )
         return
 
     transactions.pop(current)
     current -= 1 if current != 0 else 0
     await state.update_data(current=current, transactions=transactions)
+    await state.set_state(TransactionPaginationState.show)
+    await message.answer("👍", reply_markup=ReplyKeyboardRemove())
 
-    await answer_query(query, transactions[current], Currency(user.currency_id))
+    text = render_transaction(transactions[current], Currency(user.currency_id))
+    await message.answer(
+        text, reply_markup=get_transaction_pagination_inline_keyboard()
+    )
+
+
+@router.message(TransactionPaginationState.confirm_delete, F.text == YesNoAnswer.NO)
+async def handle_reject_delete_callback_query(
+    message: Message, state: FSMContext
+) -> None:
+    data = await state.get_data()
+    user: CachedUser = data["user"]
+    current: int = data["current"]
+    transactions: Sequence[Transaction] = data["transactions"]
+    transaction = transactions[current]
+
+    await state.set_state(TransactionPaginationState.show)
+    await message.answer("Canceled deletion.", reply_markup=ReplyKeyboardRemove())
+
+    text = render_transaction(transaction, Currency(user.currency_id))
+    await message.answer(
+        text, reply_markup=get_transaction_pagination_inline_keyboard()
+    )
+
+
+@router.message(TransactionPaginationState.confirm_delete)
+async def handle_invalid_delete_option(message: Message) -> None:
+    await message.answer(
+        "Please, select a valid option.", reply_markup=get_yes_no_keyboard()
+    )
 
 
 @router.callback_query(

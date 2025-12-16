@@ -19,12 +19,11 @@ async def handle_global_cancel(
     Allow user to cancel any state action.
     """
     current_state = await state.get_state()
-    if current_state is None:
-        return
+    if current_state is not None:
+        aiogram_logger.info(f"Canceled current action {user.id}.")
+        await state.clear()
 
-    aiogram_logger.info(f"Canceled current action {user.id}.")
-    await state.clear()
     await message.answer(
-        "Cancelled.",
+        "Canceled.",
         reply_markup=ReplyKeyboardRemove(),
     )

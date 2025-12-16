@@ -14,3 +14,4 @@ class TransactionForm(StatesGroup):
 
 class TransactionPaginationState(StatesGroup):
     show = State()
+    confirm_delete = State()

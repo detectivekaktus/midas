@@ -1,21 +1,30 @@
 services:
     midas:
         image: midas
-        container_name: midas
-        pull_policy: never
+        container_name: midas-python
         build: .
         env_file:
             - .env
+        depends_on:
+            - db
+        restart: unless-stopped
 
     db:
         image: postgres:17.6-alpine3.22
-        container_name: midas_postgres
+        container_name: midas-pg
         env_file:
             - .env
         ports:
             - 5432:5432
         volumes:
             - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+            interval: 10s
+            timeout: 30s
+            retries: 5
+            start_period: 30s
+        restart: unless-stopped
 
 volumes:
     postgres_data:

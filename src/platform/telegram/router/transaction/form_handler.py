@@ -59,17 +59,18 @@ async def skipped_unskippable(
 
 async def create_transaction(message: Message, state: FSMContext) -> None:
     data = {k: v for k, v in (await state.get_data()).items() if k not in ("mode")}
+    await state.clear()
 
     try:
         usecase = CreateTransactionUsecase()
         await usecase.execute(**data)
-        await send_transactions_menu(message, state, "👍")
+        await send_transactions_menu(message, state, "👍", set_state=True)
     except Exception as e:
         # Should be unreachable.
         aiogram_logger.error(f"Transaction creation failed: {data}")
         aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
         await send_transactions_menu(
-            message, state, "Failed. Something wrong happened."
+            message, state, "Failed. Something wrong happened.", set_state=True
         )
 
 
@@ -79,23 +80,24 @@ async def edit_transaction(message: Message, state: FSMContext) -> None:
         for k, v in (await state.get_data()).items()
         if k not in ("user_id", "mode", "transaction")
     }
+    await state.clear()
 
     try:
         usecase = EditTransactionUsecase()
         await usecase.execute(**data)
-        await send_transactions_menu(message, state, "👍")
+        await send_transactions_menu(message, state, "👍", set_state=True)
     except ValueError:
         aiogram_logger.info(
             f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
         )
         await send_transactions_menu(
-            message, state, "Failed. You must specify at least 1 field."
+            message, state, "Failed. You must specify at least 1 field.", set_state=True
         )
     except Exception as e:
         aiogram_logger.error(f"Transaction edit failed: {data}")
         aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
         await send_transactions_menu(
-            message, state, "Failed. Something wrong happened."
+            message, state, "Failed. Something wrong happened.", set_state=True
         )
 
 
@@ -239,8 +241,6 @@ async def handle_valid_amount(
         await state.update_data(id=transaction.id)
 
         await edit_transaction(message, state)
-
-    await state.clear()
 
 
 @router.message(TransactionForm.amount)

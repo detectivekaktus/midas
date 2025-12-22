@@ -41,15 +41,25 @@ async def send_main_menu(
 
 
 async def send_profile_menu(
-    message: Message, state: FSMContext, text: str = "Select an option from list below."
+    message: Message,
+    state: FSMContext,
+    text: str = "Select an option from list below.",
+    set_state: bool = False,
 ) -> None:
+    if set_state:
+        await state.set_state(MenuState.active)
     await state.update_data(current=Menu.PROFILE, prev=Menu.MAIN)
     await message.answer(text, reply_markup=get_profile_menu_keyboard())
 
 
 async def send_transactions_menu(
-    message: Message, state: FSMContext, text: str = "Select an option from list below."
+    message: Message,
+    state: FSMContext,
+    text: str = "Select an option from list below.",
+    set_state: bool = False,
 ) -> None:
+    if set_state:
+        await state.set_state(MenuState.active)
     await state.update_data(current=Menu.TRANSACTIONS, prev=Menu.MAIN)
     await message.answer(text, reply_markup=get_transactions_menu_keyboard())
 

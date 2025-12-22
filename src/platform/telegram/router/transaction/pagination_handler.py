@@ -261,7 +261,7 @@ async def handle_invalid_delete_option(message: Message) -> None:
 async def handle_edit_callback_query(query: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
 
-    mode: FormMode = "edit"
+    mode: FormMode = FormMode.EDIT
     user: CachedUser = data["user"]
     transactions: Sequence[Transaction] = data["transactions"]  # type: ignore
     current: int = data["current"]

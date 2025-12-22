@@ -1,5 +1,5 @@
 from aiogram import Router
-from .registration_handler import router as registration
+from .form_handler import router as registration
 from .deletion_handler import router as deletion
 
 router = Router(name=__name__)

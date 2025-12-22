@@ -1,7 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-class UserRegistrationForm(StatesGroup):
+class UserForm(StatesGroup):
     """
     User registration form.
 

@@ -15,6 +15,7 @@ class BackOption(StrEnum):
 
 
 class ProfileMenuOption(StrEnum):
+    CHANGE_PROFILE = "✏️ Change profile"
     DELETE_PROFILE = "🚫 Delete profile"
 
 

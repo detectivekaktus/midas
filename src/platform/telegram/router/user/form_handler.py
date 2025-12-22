@@ -22,7 +22,6 @@ router = Router(name=__name__)
 
 async def register_user(message: Message, state: FSMContext) -> None:
     data = {k: v for k, v in (await state.get_data()).items() if k not in ("mode")}
-    await state.clear()
 
     try:
         usecase = RegisterUserUsecase()
@@ -41,7 +40,6 @@ async def register_user(message: Message, state: FSMContext) -> None:
 
 async def change_user_currency(message: Message, state: FSMContext) -> None:
     data = {k: v for k, v in (await state.get_data()).items() if k not in ("mode")}
-    await state.clear()
 
     try:
         usecase = EditUserUsecase()
@@ -49,7 +47,11 @@ async def change_user_currency(message: Message, state: FSMContext) -> None:
         await send_main_menu(
             message, state, f"Currency changed to {data.get("currency").name}."  # type: ignore
         )
-    except ValueError:
+    except ValueError as e:
+        if "No changes were detected" in str(e):
+            await send_main_menu(message, state, "You can't specify the same currency.")
+            return
+
         aiogram_logger.error(f"User currency change failed: {data.get("user_id")}")
         await send_main_menu(message, state, "Failed. Something wrong happened.")
 

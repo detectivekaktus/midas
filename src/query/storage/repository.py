@@ -70,7 +70,7 @@ class StorageRepository(GenericRepository[Storage, int], EagerLoadable[Storage, 
         """
         stmt = select(Storage).where(Storage.user_id == user_id)
         if eager:
-            stmt.options(selectinload(Storage.account))
+            stmt = stmt.options(selectinload(Storage.account))
 
         return (await self._session.scalars(stmt)).fetchall()
 

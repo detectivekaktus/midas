@@ -3,6 +3,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from src.service.user_caching import CachedUser
+from src.usecase.storage import GetUserStorageUsecase
+from src.util.enums import Currency
+
 from src.platform.telegram.state.menu import MenuState
 from src.platform.telegram.util.menu.events import (
     Menu,
@@ -29,6 +33,19 @@ async def handle_profile_menu(message: Message, state: FSMContext) -> None:
 @router.message(MenuState.active, F.text == MainMenuOption.TRANSACTIONS)
 async def handle_transactions_menu(message: Message, state: FSMContext) -> None:
     await send_transactions_menu(message, state)
+
+
+@router.message(Command("balance"))
+@router.message(MenuState.active, F.text == MainMenuOption.BALANCE)
+async def handle_balance_command(
+    message: Message, state: FSMContext, user: CachedUser
+) -> None:
+    usecase = GetUserStorageUsecase()
+    storage = await usecase.execute(user.id)
+
+    currency = Currency(user.currency_id).name
+    text = f"🏦 Your current balance: {currency} {storage.amount}"
+    await send_main_menu(message, state, text=text)
 
 
 @router.message(MenuState.active, F.text == BackOption.BACK)

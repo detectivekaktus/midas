@@ -25,7 +25,7 @@ class GetUserStorageUsecase(AbstractUsecase[Storage]):
         :type index: int
         :return: the `index`th storage associated with `user_id`.
         :rtype: Storage
-        :raise KeyError: if index is out of bound.
+        :raise IndexError: if index is out of bound.
         :raise ValueError: if there's no user with `user_id`.
         """
         async with self._session:

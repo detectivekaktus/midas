@@ -1,4 +1,4 @@
-from typing import Optional, override
+from typing import Optional, Sequence, override
 from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,6 +53,26 @@ class StorageRepository(GenericRepository[Storage, int], EagerLoadable[Storage, 
             ).one_or_none()
 
         return await super().get_by_id(id)
+
+    async def get_by_user_id(
+        self, user_id: int, eager: bool = False
+    ) -> Sequence[Storage]:
+        """
+        Get all accounts associated with `user_id` user.
+
+        :param user_id: user's telegram id.
+        :type user_id: int
+        :param eager: use eager loading.
+        :type eager: bool
+        :return: list of storages associated with the `user_id` user. The list
+        may be empty if `user_id` is invalid.
+        :rtype: Sequence[Storage]
+        """
+        stmt = select(Storage).where(Storage.user_id == user_id)
+        if eager:
+            stmt.options(selectinload(Storage.account))
+
+        return (await self._session.scalars(stmt)).fetchall()
 
     async def delete_all_by_user_id(self, user_id: int) -> None:
         """

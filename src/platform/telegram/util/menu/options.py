@@ -4,6 +4,7 @@ from enum import StrEnum
 class MainMenuOption(StrEnum):
     PROFILE = "👤 Profile"
     TRANSACTIONS = "🗂 Transactions"
+    BALANCE = "🏦 See my balance"
 
 
 class BackOption(StrEnum):

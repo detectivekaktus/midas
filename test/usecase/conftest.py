@@ -1,6 +1,7 @@
 from pytest import fixture
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.usecase.transaction import CreateTransactionUsecase
 from src.usecase.user import RegisterUserUsecase, GetUserUsecase
 
 
@@ -15,4 +16,11 @@ def test_register_usecase(test_engine) -> RegisterUserUsecase:
 def test_get_usecase(test_engine) -> GetUserUsecase:
     session = AsyncSession(test_engine)
     usecase = GetUserUsecase(session=session)
+    return usecase
+
+
+@fixture
+def test_create_transaction(test_engine) -> CreateTransactionUsecase:
+    session = AsyncSession(test_engine)
+    usecase = CreateTransactionUsecase(session=session)
     return usecase

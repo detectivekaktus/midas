@@ -12,6 +12,7 @@ from src.query.account import AccountRepository
 from src.query.transaction import TransactionRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import TransactionType
+from src.util.errors import NoChangesDetectedException
 
 
 class EditTransactionUsecase(AbstractUsecase[None]):
@@ -55,7 +56,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
             if v is not None and getattr(transaction, k, v) != v
         }
         if len(updates) == 0:
-            raise ValueError("No valid updates found")
+            raise NoChangesDetectedException("No valid updates found")
 
         return updates
 
@@ -213,8 +214,9 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         :param description: transaction description
         :type description: Optional[str]
 
-        :raise ValueError: if all optional fields are `None`, identical to source
-        transaction, or if no transaction is bound to `id`.
+        :raise ValueError: if no transaction is bound to `id`.
+        :raise NoChangesDetectedException: if all optional fields are `None`
+        or identical to source transaction.
         """
         app_logger.debug(f"Started `EditTransactionUsecase` execution: {id}")
 

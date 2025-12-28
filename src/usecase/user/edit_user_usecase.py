@@ -7,6 +7,7 @@ from src.services import user_storage
 from src.query.user.repository import UserRepository
 from src.usecase.abstract_usecase import AbstractUsecase
 from src.util.enums import Currency
+from src.util.errors import NoChangesDetectedException
 
 
 class EditUserUsecase(AbstractUsecase[None]):
@@ -31,8 +32,9 @@ class EditUserUsecase(AbstractUsecase[None]):
         :param currency: new currency
         :type currency: Currency
 
-        :raise ValueError: if no user with `user_id` exists or if user is
-        already using `currency` currency.
+        :raise ValueError: if no user with `user_id` exists.
+        :raise NoChangesDetectedException: if user initial data is identical to
+        the update data.
         """
         app_logger.debug("Started `EditUserUsecase` execution")
 
@@ -42,7 +44,7 @@ class EditUserUsecase(AbstractUsecase[None]):
                 raise ValueError(f"No user with {user_id} id was found")
 
             if user.currency_id == currency:
-                raise ValueError("No changes were detected")
+                raise NoChangesDetectedException("No changes were detected")
 
             user.currency_id = currency
             await user_storage.store(user)

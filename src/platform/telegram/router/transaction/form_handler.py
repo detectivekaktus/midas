@@ -11,6 +11,7 @@ from src.service.user_caching import CachedUser
 from src.db.schemas.transaction import Transaction
 from src.usecase.transaction import CreateTransactionUsecase, EditTransactionUsecase
 from src.util.enums import TransactionType
+from src.util.errors import NoChangesDetectedException
 
 from src.platform.telegram.keyboard import get_skip_keyboard
 from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
@@ -86,7 +87,7 @@ async def edit_transaction(message: Message, state: FSMContext) -> None:
         usecase = EditTransactionUsecase()
         await usecase.execute(**data)
         await send_transactions_menu(message, state, "👍", set_state=True)
-    except ValueError:
+    except NoChangesDetectedException:
         aiogram_logger.info(
             f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
         )

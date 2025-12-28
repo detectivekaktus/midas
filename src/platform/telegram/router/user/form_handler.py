@@ -6,8 +6,9 @@ from aiogram.fsm.context import FSMContext
 from src.loggers import aiogram_logger
 from src.service.user_caching import CachedUser
 
-from src.util.enums import Currency
 from src.usecase.user import RegisterUserUsecase, EditUserUsecase
+from src.util.enums import Currency
+from src.util.errors import NoChangesDetectedException
 
 from src.platform.telegram.validator.currency import valid_currency_filter
 from src.platform.telegram.keyboard.currency import get_currency_keyboard
@@ -47,11 +48,10 @@ async def change_user_currency(message: Message, state: FSMContext) -> None:
         await send_main_menu(
             message, state, f"Currency changed to {data.get("currency").name}."  # type: ignore
         )
-    except ValueError as e:
-        if "No changes were detected" in str(e):
-            await send_main_menu(message, state, "You can't specify the same currency.")
-            return
-
+    except NoChangesDetectedException:
+        await send_main_menu(message, state, "You can't specify the same currency.")
+        return
+    except Exception:
         aiogram_logger.error(f"User currency change failed: {data.get("user_id")}")
         await send_main_menu(message, state, "Failed. Something wrong happened.")
 

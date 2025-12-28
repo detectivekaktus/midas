@@ -7,6 +7,7 @@ from src.db.schemas.storage import Storage
 from src.query.account import AccountRepository
 from src.usecase.transaction import EditTransactionUsecase
 from src.util.enums import Currency, TransactionType
+from src.util.errors import NoChangesDetectedException
 
 
 @fixture
@@ -178,7 +179,7 @@ async def test_pass_no_arguments(
 
     transaction = (await test_get_transactions.execute(user_id))[0]
 
-    with raises(ValueError):
+    with raises(NoChangesDetectedException):
         await test_edit_transaction.execute(transaction.id)
 
 
@@ -203,7 +204,7 @@ async def test_pass_same_arguments(
 
     transaction = (await test_get_transactions.execute(user_id))[0]
 
-    with raises(ValueError):
+    with raises(NoChangesDetectedException):
         await test_edit_transaction.execute(
             transaction.id,
             transaction.transaction_type_id,

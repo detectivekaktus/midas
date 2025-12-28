@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.usecase.user import EditUserUsecase
 from src.util.enums import Currency
+from src.util.errors import NoChangesDetectedException
 
 
 @fixture
@@ -42,5 +43,5 @@ async def test_change_nothing(test_register_usecase, test_edit_user):
     currency = Currency.EUR
 
     await test_register_usecase.execute(user_id, currency)
-    with raises(ValueError):
+    with raises(NoChangesDetectedException):
         await test_edit_user.execute(user_id, Currency.EUR)

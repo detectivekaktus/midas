@@ -6,11 +6,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 from src.loggers import aiogram_logger
+from src.service.user_caching import CachedUser
 
 from src.db.schemas.transaction import Transaction
-from src.db.schemas.user import User
 from src.usecase.transaction import CreateTransactionUsecase, EditTransactionUsecase
 from src.util.enums import TransactionType
+from src.util.errors import NoChangesDetectedException
 
 from src.platform.telegram.keyboard import get_skip_keyboard
 from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
@@ -18,6 +19,8 @@ from src.platform.telegram.state import FormMode
 from src.platform.telegram.state.transaction import TransactionForm
 from src.platform.telegram.validator import SkipAnswer, amount_filter
 from src.platform.telegram.validator.transaction import valid_transaction_type_filter
+from src.platform.telegram.util.menu.events import remove_menu, send_transactions_menu
+from src.platform.telegram.util.menu.options import TransactionsMenuOption
 
 
 router = Router(name=__name__)
@@ -46,20 +49,69 @@ async def skipped_unskippable(
     :return: `True` if input is valid, `False` otherwise
     :rtype: bool
     """
-    if mode == "create" and (injected is None or message.text == SkipAnswer.SKIP):
+    if mode == FormMode.CREATE and (
+        injected is None or message.text == SkipAnswer.SKIP
+    ):
         await message.answer("You can't skip this option.", reply_markup=reply_markup)
         return True
 
     return False
 
 
+async def create_transaction(message: Message, state: FSMContext) -> None:
+    data = {k: v for k, v in (await state.get_data()).items() if k not in ("mode")}
+    await state.clear()
+
+    try:
+        usecase = CreateTransactionUsecase()
+        await usecase.execute(**data)
+        await send_transactions_menu(message, state, "👍", set_state=True)
+    except Exception as e:
+        # Should be unreachable.
+        aiogram_logger.error(f"Transaction creation failed: {data}")
+        aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
+        await send_transactions_menu(
+            message, state, "Failed. Something wrong happened.", set_state=True
+        )
+
+
+async def edit_transaction(message: Message, state: FSMContext) -> None:
+    data = {
+        k: v
+        for k, v in (await state.get_data()).items()
+        if k not in ("user_id", "mode", "transaction")
+    }
+    await state.clear()
+
+    try:
+        usecase = EditTransactionUsecase()
+        await usecase.execute(**data)
+        await send_transactions_menu(message, state, "👍", set_state=True)
+    except NoChangesDetectedException:
+        aiogram_logger.info(
+            f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
+        )
+        await send_transactions_menu(
+            message, state, "Failed. You must specify at least 1 field.", set_state=True
+        )
+    except Exception as e:
+        aiogram_logger.error(f"Transaction edit failed: {data}")
+        aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
+        await send_transactions_menu(
+            message, state, "Failed. Something wrong happened.", set_state=True
+        )
+
+
 @router.message(Command("add_transaction"))
+@router.message(F.text == TransactionsMenuOption.ADD)
 async def handle_add_transaction_command(
-    message: Message, state: FSMContext, user: User
+    message: Message, state: FSMContext, user: CachedUser
 ) -> None:
     aiogram_logger.info(f"Received `/add_transaction` command: {user.id}")
 
-    mode: FormMode = "create"
+    await remove_menu(message, state)
+
+    mode = FormMode.CREATE
     await state.update_data(user_id=user.id, mode=mode)
     await state.set_state(TransactionForm.transaction_type)
     await message.answer(
@@ -80,7 +132,7 @@ async def handle_valid_type(
     ):
         return
 
-    if mode == "create":
+    if mode == FormMode.CREATE:
         await state.update_data(transaction_type=transaction_type)
         await message.answer(
             "Enter the transaction title.", reply_markup=ReplyKeyboardRemove()
@@ -111,7 +163,7 @@ async def handle_valid_title(message: Message, state: FSMContext) -> None:
     if await skipped_unskippable(message, mode):
         return
 
-    if mode == "create":
+    if mode == FormMode.CREATE:
         await state.update_data(title=message.text)
         await message.answer(
             "Optional: add a description.", reply_markup=get_skip_keyboard()
@@ -141,7 +193,7 @@ async def handle_valid_description(message: Message, state: FSMContext) -> None:
     if message.text != SkipAnswer.SKIP:
         await state.update_data(description=message.text)
 
-    if mode == "create":
+    if mode == FormMode.CREATE:
         await message.answer(
             "Enter the transaction amount.", reply_markup=ReplyKeyboardRemove()
         )
@@ -172,59 +224,24 @@ async def handle_valid_amount(
     if await skipped_unskippable(message, mode, amount):
         return
 
-    if mode == "create":
+    if mode == FormMode.CREATE:
+        aiogram_logger.info(
+            f"Confirm transaction creation: {await state.get_value("user_id")}"
+        )
         await state.update_data(amount=amount)
-        data = {k: v for k, v in (await state.get_data()).items() if k not in ("mode")}
-
-        aiogram_logger.info(f"Confirm transaction creation: {data.get("user_id")}")
-
-        try:
-            usecase = CreateTransactionUsecase()
-            await usecase.execute(**data)
-            await message.answer("👍")
-        except Exception as e:
-            # Should be unreachable.
-            aiogram_logger.error(f"Transaction creation failed: {data}")
-            aiogram_logger.error(
-                f"The problem to this was the following exception:\n{e}"
-            )
-            await message.answer("Failed. Something wrong happened.")
+        await create_transaction(message, state)
     else:
+        aiogram_logger.info(
+            f"Confirm transaction editing: {await state.get_value("user_id")}"
+        )
+
         if amount is not None and message.text != SkipAnswer.SKIP:
             await state.update_data(amount=amount)
 
         transaction: Transaction = await state.get_value("transaction")  # type: ignore
-        data = {
-            k: v
-            for k, v in (await state.get_data()).items()
-            if k not in ("user_id", "mode", "transaction")
-        }
-        data["id"] = transaction.id
+        await state.update_data(id=transaction.id)
 
-        aiogram_logger.info(f"Confirm transaction edit: {data.get("user_id")}")
-
-        try:
-            usecase = EditTransactionUsecase()
-            await usecase.execute(**data)
-            await message.answer("👍", reply_markup=ReplyKeyboardRemove())
-        except ValueError:
-            aiogram_logger.info(
-                f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
-            )
-            await message.answer(
-                "Failed. You must specify at least 1 field.",
-                reply_markup=ReplyKeyboardRemove(),
-            )
-        except Exception as e:
-            aiogram_logger.error(f"Transaction edit failed: {data}")
-            aiogram_logger.error(
-                f"The problem to this was the following exception:\n{e}"
-            )
-            await message.answer(
-                "Failed. Something wrong happened.", reply_markup=ReplyKeyboardRemove()
-            )
-
-    await state.clear()
+        await edit_transaction(message, state)
 
 
 @router.message(TransactionForm.amount)

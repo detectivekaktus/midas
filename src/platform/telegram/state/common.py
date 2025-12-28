@@ -1,4 +1,4 @@
-from typing import Literal
+from enum import IntEnum
 from aiogram.fsm.state import State, StatesGroup
 
 
@@ -6,4 +6,6 @@ class ConfirmForm(StatesGroup):
     confirm = State()
 
 
-FormMode = Literal["create", "edit"]
+class FormMode(IntEnum):
+    CREATE = 0
+    EDIT = 1

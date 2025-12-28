@@ -1,20 +1,14 @@
 from random import choice, randrange
-from pytest import fixture, mark
+from pytest import mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.usecase.user import GetUserUsecase
 from src.util.enums import Currency
 
 
-@fixture
-def test_get_usecase(test_engine) -> GetUserUsecase:
-    session = AsyncSession(test_engine)
-    usecase = GetUserUsecase(session=session)
-    return usecase
-
-
 @mark.asyncio
-async def test_register_and_get_back(test_register_usecase, test_get_usecase, test_engine):
+async def test_register_and_get_back(
+    test_register_usecase, test_get_usecase, test_engine
+):
     user_id = 123456789
     currency = Currency.EUR
     await test_register_usecase.execute(user_id, currency)
@@ -30,12 +24,11 @@ async def test_register_and_get_back(test_register_usecase, test_get_usecase, te
 
 
 @mark.asyncio
-async def test_register_multiple_and_get_back(test_register_usecase, test_get_usecase, test_engine):
+async def test_register_multiple_and_get_back(
+    test_register_usecase, test_get_usecase, test_engine
+):
     user_data = [
-        {
-            "user_id": randrange(100000000, 999999999),
-            "currency": choice(list(Currency))
-        }
+        {"user_id": randrange(100000000, 999999999), "currency": choice(list(Currency))}
         for _ in range(5)
     ]
 

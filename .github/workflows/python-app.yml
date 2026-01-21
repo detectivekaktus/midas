@@ -28,7 +28,7 @@ jobs:
         pipx install poetry
     - name: Install dependencies via poetry
       run: |
-        poetry install --no-interaction --no-root
+        poetry install --no-interaction
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

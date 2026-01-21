@@ -1,7 +1,7 @@
 from pytest import fixture
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.usecase.transaction import GetTransactionsUsecase
+from midas.usecase.transaction import GetTransactionsUsecase
 
 
 @fixture

@@ -2,11 +2,11 @@ from decimal import Decimal
 from pytest import fixture, mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.storage import Storage
-from src.query.account.repository import AccountRepository
-from src.query.storage.repository import StorageRepository
-from src.usecase.transaction import DeleteTransactionUsecase
-from src.util.enums import Currency, TransactionType
+from midas.db.schemas.storage import Storage
+from midas.query.account.repository import AccountRepository
+from midas.query.storage.repository import StorageRepository
+from midas.usecase.transaction import DeleteTransactionUsecase
+from midas.util.enums import Currency, TransactionType
 
 
 @fixture

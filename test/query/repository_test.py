@@ -1,8 +1,8 @@
 from pytest import fixture, mark, raises
 
-from src.db.schemas.user import User
-from src.query import GenericRepository, create_session
-from src.util.enums import Currency
+from midas.db.schemas.user import User
+from midas.query import GenericRepository, create_session
+from midas.util.enums import Currency
 
 
 @fixture

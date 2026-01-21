@@ -18,7 +18,7 @@ poetry install
 
 Setup the database with:
 ```sh
-alembic upgrade head
+poetry run migrate
 poetry run seed
 ```
 

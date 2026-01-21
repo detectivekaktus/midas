@@ -2,17 +2,17 @@ from decimal import Decimal
 from typing import Optional, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.loggers import app_logger
+from midas.loggers import app_logger
 
-from src.db.schemas.storage import Storage
-from src.db.schemas.account import Account
-from src.db.schemas.transaction import Transaction
-from src.query.account import AccountRepository
-from src.query.storage import StorageRepository
-from src.query.transaction import TransactionRepository
-from src.query.user import UserRepository
-from src.usecase.abstract_usecase import AbstractUsecase
-from src.util.enums import TransactionType
+from midas.db.schemas.storage import Storage
+from midas.db.schemas.account import Account
+from midas.db.schemas.transaction import Transaction
+from midas.query.account import AccountRepository
+from midas.query.storage import StorageRepository
+from midas.query.transaction import TransactionRepository
+from midas.query.user import UserRepository
+from midas.usecase.abstract_usecase import AbstractUsecase
+from midas.util.enums import TransactionType
 
 
 class CreateTransactionUsecase(AbstractUsecase[None]):

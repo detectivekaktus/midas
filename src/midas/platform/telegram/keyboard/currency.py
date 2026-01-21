@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from src.platform.telegram.util.currency import get_currency_list
+from midas.platform.telegram.util.currency import get_currency_list
 
 
 def get_currency_keyboard() -> ReplyKeyboardMarkup:

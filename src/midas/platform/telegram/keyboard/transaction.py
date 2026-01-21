@@ -1,8 +1,8 @@
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from src.platform.telegram.util.transaction import get_transaction_type_list
-from src.platform.telegram.validator import SkipAnswer
+from midas.platform.telegram.util.transaction import get_transaction_type_list
+from midas.platform.telegram.validator import SkipAnswer
 
 
 def get_transaction_type_keyboard(skippable: bool = False) -> ReplyKeyboardMarkup:

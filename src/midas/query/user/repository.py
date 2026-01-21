@@ -3,9 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.user import User
-from src.query.interface.eager_loadable import EagerLoadable
-from src.query import GenericRepository
+from midas.db.schemas.user import User
+from midas.query.interface.eager_loadable import EagerLoadable
+from midas.query import GenericRepository
 
 
 class UserRepository(GenericRepository[User, int], EagerLoadable[User, int]):
@@ -22,7 +22,7 @@ class UserRepository(GenericRepository[User, int], EagerLoadable[User, int]):
     the fetch method can use eager loading mechanisms of
     sqlalchemy.
     """
-    
+
     @override
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(User, session)
@@ -48,10 +48,7 @@ class UserRepository(GenericRepository[User, int], EagerLoadable[User, int]):
                 await self._session.scalars(
                     select(User)
                     .where(User.id == id)
-                    .options(
-                        selectinload(User.accounts),
-                        selectinload(User.storages)
-                    )
+                    .options(selectinload(User.accounts), selectinload(User.storages))
                 )
             ).one_or_none()
 

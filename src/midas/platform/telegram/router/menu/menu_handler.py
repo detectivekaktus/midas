@@ -3,18 +3,18 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src.service.user_caching import CachedUser
-from src.usecase.storage import GetUserStorageUsecase
-from src.util.enums import Currency
+from midas.service.user_caching import CachedUser
+from midas.usecase.storage import GetUserStorageUsecase
+from midas.util.enums import Currency
 
-from src.platform.telegram.state.menu import MenuState
-from src.platform.telegram.util.menu.events import (
+from midas.platform.telegram.state.menu import MenuState
+from midas.platform.telegram.util.menu.events import (
     Menu,
     send_main_menu,
     send_profile_menu,
     send_transactions_menu,
 )
-from src.platform.telegram.util.menu.options import BackOption, MainMenuOption
+from midas.platform.telegram.util.menu.options import BackOption, MainMenuOption
 
 
 router = Router(name=__name__)

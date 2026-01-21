@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from src.db import Base
+from midas.db import Base
 
 
 class EagerLoadable[T: Base, ID](ABC):

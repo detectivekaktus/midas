@@ -2,8 +2,8 @@ from importlib import import_module
 from os import listdir
 from pathlib import Path
 
-# Path(__file__) is src/db/schema/__init__.py, while
-# Path(__file__).parent is src/db/schema
+# Path(__file__) is src/midas/db/schema/__init__.py, while
+# Path(__file__).parent is src/midas/db/schema
 package_dir = Path(__file__).parent
 
 for file in package_dir.iterdir():

@@ -3,10 +3,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src.loggers import aiogram_logger
-from src.service.user_caching import CachedUser
+from midas.loggers import aiogram_logger
+from midas.service.user_caching import CachedUser
 
-from src.platform.telegram.util.menu.events import send_main_menu
+from midas.platform.telegram.util.menu.events import send_main_menu
 
 router = Router(name=__name__)
 

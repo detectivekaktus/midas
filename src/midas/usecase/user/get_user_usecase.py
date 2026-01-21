@@ -1,11 +1,11 @@
 from typing import Optional, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.loggers import app_logger
+from midas.loggers import app_logger
 
-from src.db.schemas.user import User
-from src.query.user import UserRepository
-from src.usecase.abstract_usecase import AbstractUsecase
+from midas.db.schemas.user import User
+from midas.query.user import UserRepository
+from midas.usecase.abstract_usecase import AbstractUsecase
 
 
 class GetUserUsecase(AbstractUsecase[Optional[User]]):

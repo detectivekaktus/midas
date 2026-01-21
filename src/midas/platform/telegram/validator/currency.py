@@ -1,12 +1,12 @@
 from aiogram.types import Message
 
-from src.util.enums import Currency
+from midas.util.enums import Currency
 
 
 def validate_currency(text: str) -> Currency:
     """
     Check if text is an element inside currency list from
-    `src.platform.telegram.util.currency` module.
+    `midas.platform.telegram.util.currency` module.
 
     :return: currency enum element.
     :rtype: Currency

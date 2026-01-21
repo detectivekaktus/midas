@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
-from src.db import engine
+from midas.db import engine
 
 
 def create_session(custom_engine: Optional[AsyncEngine] = None) -> AsyncSession:

@@ -1,13 +1,13 @@
 from typing import override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.loggers import app_logger
-from src.services import user_storage
+from midas.loggers import app_logger
+from midas.services import user_storage
 
-from src.query.user.repository import UserRepository
-from src.usecase.abstract_usecase import AbstractUsecase
-from src.util.enums import Currency
-from src.util.errors import NoChangesDetectedException
+from midas.query.user.repository import UserRepository
+from midas.usecase.abstract_usecase import AbstractUsecase
+from midas.util.enums import Currency
+from midas.util.errors import NoChangesDetectedException
 
 
 class EditUserUsecase(AbstractUsecase[None]):

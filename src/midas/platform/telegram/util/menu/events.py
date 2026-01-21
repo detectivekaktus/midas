@@ -2,12 +2,12 @@ from enum import IntEnum
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from src.platform.telegram.keyboard.menu import (
+from midas.platform.telegram.keyboard.menu import (
     get_main_menu_keyboard,
     get_profile_menu_keyboard,
     get_transactions_menu_keyboard,
 )
-from src.platform.telegram.state.menu import MenuState
+from midas.platform.telegram.state.menu import MenuState
 
 
 class Menu(IntEnum):

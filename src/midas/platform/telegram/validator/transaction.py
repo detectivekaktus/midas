@@ -1,7 +1,7 @@
 from typing import Optional
 from aiogram.types import Message
 
-from src.util.enums import TransactionType
+from midas.util.enums import TransactionType
 
 
 def validate_transaction_type(text: str) -> TransactionType:

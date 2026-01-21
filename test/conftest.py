@@ -2,7 +2,7 @@ from typing import AsyncGenerator
 from pytest_asyncio import fixture
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from src.db import Base
+from midas.db import Base
 
 
 @fixture

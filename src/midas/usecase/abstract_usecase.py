@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.query.session import create_session
+from midas.query.session import create_session
 
 
 class AbstractUsecase[T](ABC):

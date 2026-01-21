@@ -3,19 +3,19 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-from src.loggers import aiogram_logger
-from src.service.user_caching import CachedUser
+from midas.loggers import aiogram_logger
+from midas.service.user_caching import CachedUser
 
-from src.usecase.user import RegisterUserUsecase, EditUserUsecase
-from src.util.enums import Currency
-from src.util.errors import NoChangesDetectedException
+from midas.usecase.user import RegisterUserUsecase, EditUserUsecase
+from midas.util.enums import Currency
+from midas.util.errors import NoChangesDetectedException
 
-from src.platform.telegram.validator.currency import valid_currency_filter
-from src.platform.telegram.keyboard.currency import get_currency_keyboard
-from src.platform.telegram.state import FormMode
-from src.platform.telegram.state.user import UserForm
-from src.platform.telegram.util.menu.events import remove_menu, send_main_menu
-from src.platform.telegram.util.menu.options import ProfileMenuOption
+from midas.platform.telegram.validator.currency import valid_currency_filter
+from midas.platform.telegram.keyboard.currency import get_currency_keyboard
+from midas.platform.telegram.state import FormMode
+from midas.platform.telegram.state.user import UserForm
+from midas.platform.telegram.util.menu.events import remove_menu, send_main_menu
+from midas.platform.telegram.util.menu.options import ProfileMenuOption
 
 
 router = Router(name=__name__)

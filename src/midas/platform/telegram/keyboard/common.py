@@ -1,8 +1,8 @@
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from src.platform.telegram.validator import SkipAnswer
-from src.platform.telegram.validator import YesNoAnswer
+from midas.platform.telegram.validator import SkipAnswer
+from midas.platform.telegram.validator import YesNoAnswer
 
 
 def get_yes_no_keyboard() -> ReplyKeyboardMarkup:

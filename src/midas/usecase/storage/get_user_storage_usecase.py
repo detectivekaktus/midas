@@ -1,9 +1,9 @@
 from typing import override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.storage import Storage
-from src.query.storage import StorageRepository
-from src.usecase.abstract_usecase import AbstractUsecase
+from midas.db.schemas.storage import Storage
+from midas.query.storage import StorageRepository
+from midas.usecase.abstract_usecase import AbstractUsecase
 
 
 class GetUserStorageUsecase(AbstractUsecase[Storage]):

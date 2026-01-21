@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import uuid4
 from sqlalchemy import TIMESTAMP, ForeignKey, Numeric, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from src.db import Base
+from midas.db import Base
 
 
 class Transaction(Base):

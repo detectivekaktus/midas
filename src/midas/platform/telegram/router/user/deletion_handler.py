@@ -3,17 +3,17 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
-from src.loggers import aiogram_logger
-from src.service.user_caching import CachedUser
-from src.services import user_storage
+from midas.loggers import aiogram_logger
+from midas.service.user_caching import CachedUser
+from midas.services import user_storage
 
-from src.usecase.user import DeleteUserUsecase
+from midas.usecase.user import DeleteUserUsecase
 
-from src.platform.telegram.validator import YesNoAnswer
-from src.platform.telegram.keyboard import get_yes_no_keyboard
-from src.platform.telegram.state import ConfirmForm
-from src.platform.telegram.util.menu.events import remove_menu
-from src.platform.telegram.util.menu.options import ProfileMenuOption
+from midas.platform.telegram.validator import YesNoAnswer
+from midas.platform.telegram.keyboard import get_yes_no_keyboard
+from midas.platform.telegram.state import ConfirmForm
+from midas.platform.telegram.util.menu.events import remove_menu
+from midas.platform.telegram.util.menu.options import ProfileMenuOption
 
 
 router = Router(name=__name__)

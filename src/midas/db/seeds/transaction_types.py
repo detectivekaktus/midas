@@ -1,11 +1,11 @@
 from json import loads
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.db import engine
-from src.db.schemas.transaction_type import TransactionType
+from midas.db import engine
+from midas.db.schemas.transaction_type import TransactionType
 
 
 async def seed() -> None:
-    with open("src/db/seeds/data/transaction_types.json", "r") as f:
+    with open("src/midas/db/seeds/data/transaction_types.json", "r") as f:
         content = f.read()
         seed_types: list[dict[str, str | bool]] = loads(content)
 

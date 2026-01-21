@@ -3,10 +3,10 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schemas.account import Account
-from src.query.interface.eager_loadable import EagerLoadable
-from src.query import GenericRepository
-from src.util.enums import TransactionType
+from midas.db.schemas.account import Account
+from midas.query.interface.eager_loadable import EagerLoadable
+from midas.query import GenericRepository
+from midas.util.enums import TransactionType
 
 
 class AccountRepository(GenericRepository[Account, int], EagerLoadable[Account, int]):

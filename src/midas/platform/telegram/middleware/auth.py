@@ -3,11 +3,11 @@ from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, Message
 
-from src.loggers import aiogram_logger
-from src.services import user_storage
+from midas.loggers import aiogram_logger
+from midas.services import user_storage
 
-from src.db.schemas.user import User
-from src.usecase.user import GetUserUsecase
+from midas.db.schemas.user import User
+from midas.usecase.user import GetUserUsecase
 
 
 class AllowedCommand(StrEnum):

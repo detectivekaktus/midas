@@ -10,28 +10,28 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 
-from src.loggers import aiogram_logger
-from src.service.user_caching import CachedUser
+from midas.loggers import aiogram_logger
+from midas.service.user_caching import CachedUser
 
-from src.db.schemas.transaction import Transaction
-from src.usecase.transaction import DeleteTransactionUsecase, GetTransactionsUsecase
-from src.util.enums import Currency, TransactionType
+from midas.db.schemas.transaction import Transaction
+from midas.usecase.transaction import DeleteTransactionUsecase, GetTransactionsUsecase
+from midas.util.enums import Currency, TransactionType
 
-from src.platform.telegram.keyboard import get_yes_no_keyboard
-from src.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
-from src.platform.telegram.keyboard.inline.transaction import (
+from midas.platform.telegram.keyboard import get_yes_no_keyboard
+from midas.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
+from midas.platform.telegram.keyboard.inline.transaction import (
     Command as PaginationCommand,
     TransactionPaginationCommand,
     get_transaction_pagination_inline_keyboard,
 )
-from src.platform.telegram.state import FormMode
-from src.platform.telegram.state.transaction import (
+from midas.platform.telegram.state import FormMode
+from midas.platform.telegram.state.transaction import (
     TransactionForm,
     TransactionPaginationState,
 )
-from src.platform.telegram.validator import YesNoAnswer
-from src.platform.telegram.util.menu.events import remove_menu, send_main_menu
-from src.platform.telegram.util.menu.options import TransactionsMenuOption
+from midas.platform.telegram.validator import YesNoAnswer
+from midas.platform.telegram.util.menu.events import remove_menu, send_main_menu
+from midas.platform.telegram.util.menu.options import TransactionsMenuOption
 
 
 router = Router(name=__name__)

@@ -1,7 +1,7 @@
 from decimal import Decimal
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from src.db import Base
+from midas.db import Base
 
 
 class Account(Base):

@@ -1,9 +1,9 @@
 from pytest import fixture, mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.usecase.user import EditUserUsecase
-from src.util.enums import Currency
-from src.util.errors import NoChangesDetectedException
+from midas.usecase.user import EditUserUsecase
+from midas.util.enums import Currency
+from midas.util.errors import NoChangesDetectedException
 
 
 @fixture

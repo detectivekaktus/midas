@@ -2,8 +2,8 @@ from asyncio import run
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import Connection
-from src.db import Base, engine
-from src.db.schemas import *
+from midas.db import Base, engine
+from midas.db.schemas import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -65,7 +65,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """
-    Async wrapper for using the async engine from `src/db`
+    Async wrapper for using the async engine from `src/midas/db`
     module. This function uses `run_sync()` method to run
     the previously defined function.
     """

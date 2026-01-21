@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from src.db.schemas.user import User
+from midas.db.schemas.user import User
 
 
 @dataclass

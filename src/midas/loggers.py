@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def load_logging_config() -> None:
-    conf_path = Path(__file__).parent.parent / "logging.conf.json"
+    conf_path = Path(__file__).parent.parent.parent / "logging.conf.json"
     with conf_path.open("r") as f:
         content = f.read()
 

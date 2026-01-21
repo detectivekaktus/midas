@@ -1,11 +1,11 @@
 from typing import Sequence, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.loggers import app_logger
+from midas.loggers import app_logger
 
-from src.db.schemas.transaction import Transaction
-from src.query.transaction import TransactionRepository
-from src.usecase.abstract_usecase import AbstractUsecase
+from midas.db.schemas.transaction import Transaction
+from midas.query.transaction import TransactionRepository
+from midas.usecase.abstract_usecase import AbstractUsecase
 
 
 class GetTransactionsUsecase(AbstractUsecase[Sequence[Transaction]]):

@@ -1,4 +1,4 @@
-from src.util.enums import Currency
+from midas.util.enums import Currency
 
 
 def get_currency_list() -> list[str]:

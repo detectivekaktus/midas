@@ -1,9 +1,9 @@
 from asyncio import run
 from sys import stdout
 from sqlalchemy import text
-from src.db import engine
-import src.db.seeds.currencies as currencies
-import src.db.seeds.transaction_types as transaction_types
+from midas.db import engine
+import midas.db.seeds.currencies as currencies
+import midas.db.seeds.transaction_types as transaction_types
 
 
 async def truncate_table(tablename: str) -> None:

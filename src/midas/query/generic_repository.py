@@ -1,7 +1,7 @@
 from typing import Iterable, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db import Base
+from midas.db import Base
 
 
 class GenericRepository[T: Base, ID]:

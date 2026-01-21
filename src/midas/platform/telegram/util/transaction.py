@@ -1,4 +1,4 @@
-from src.util.enums import TransactionType
+from midas.util.enums import TransactionType
 
 
 def get_transaction_type_list() -> list[str]:
@@ -12,15 +12,15 @@ def get_transaction_type_list() -> list[str]:
     :rtype: list[str]
     """
     type_map = {
-        TransactionType.INCOME:         "💵",
-        TransactionType.GROCERIES:      "🛒",
+        TransactionType.INCOME: "💵",
+        TransactionType.GROCERIES: "🛒",
         TransactionType.TRANSPORTATION: "🚍",
-        TransactionType.ENTERTAINMENT:  "🎮",
-        TransactionType.SHOPPING:       "🛍️",
-        TransactionType.GIFTS:          "🎁",
+        TransactionType.ENTERTAINMENT: "🎮",
+        TransactionType.SHOPPING: "🛍️",
+        TransactionType.GIFTS: "🎁",
         TransactionType.BILLS_AND_FEES: "🧾",
-        TransactionType.HEALTHCARE:     "🧑‍⚕️",
-        TransactionType.TRAVEL:         "✈️",
-        TransactionType.OTHER:          "👾"
+        TransactionType.HEALTHCARE: "🧑‍⚕️",
+        TransactionType.TRAVEL: "✈️",
+        TransactionType.OTHER: "👾",
     }
     return [f"{type_map[type_]} {type_.readable()}" for type_ in TransactionType]

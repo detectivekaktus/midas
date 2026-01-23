@@ -69,7 +69,7 @@ class CreateEventUsecase(AbstractUsecase[None]):
                 amount=amount,
                 last_run_on=today,
                 interval=update_interval,
-                next_run_at=today + timedelta(days=update_interval),
+                next_run_on=today + timedelta(days=update_interval),
             )
             self._event_repo.add(event)
 

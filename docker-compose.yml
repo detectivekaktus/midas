@@ -7,7 +7,7 @@ services:
         env_file:
             - .env
 
-    db:
+    midas_db:
         image: postgres:17.6-alpine3.22
         container_name: midas_postgres
         env_file:

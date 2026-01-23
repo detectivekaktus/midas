@@ -5,11 +5,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.db.schemas.account import Account
 from midas.query.interface.eager_loadable import EagerLoadable
+from midas.query.interface.purgeable import Purgeable
 from midas.query import GenericRepository
 from midas.util.enums import TransactionType
 
 
-class AccountRepository(GenericRepository[Account, int], EagerLoadable[Account, int]):
+class AccountRepository(
+    GenericRepository[Account, int],
+    EagerLoadable[Account, int],
+    Purgeable,
+):
     """
     Account repository class.
 
@@ -55,7 +60,8 @@ class AccountRepository(GenericRepository[Account, int], EagerLoadable[Account, 
 
         return await super().get_by_id(id)
 
-    async def delete_all_by_user_id(self, user_id: int) -> None:
+    @override
+    async def purge_by_user_id(self, user_id: int) -> None:
         """
         DELETE all rows where `accounts.user_id` = `user_id`.
 

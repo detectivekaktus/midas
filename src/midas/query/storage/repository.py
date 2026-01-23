@@ -6,9 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from midas.db.schemas.storage import Storage
 from midas.query.interface.eager_loadable import EagerLoadable
 from midas.query import GenericRepository
+from midas.query.interface.purgeable import Purgeable
 
 
-class StorageRepository(GenericRepository[Storage, int], EagerLoadable[Storage, int]):
+class StorageRepository(
+    GenericRepository[Storage, int],
+    EagerLoadable[Storage, int],
+    Purgeable,
+):
     """
     Storage repository class.
 
@@ -74,7 +79,8 @@ class StorageRepository(GenericRepository[Storage, int], EagerLoadable[Storage, 
 
         return (await self._session.scalars(stmt)).fetchall()
 
-    async def delete_all_by_user_id(self, user_id: int) -> None:
+    @override
+    async def purge_by_user_id(self, user_id: int) -> None:
         """
         DELETE all rows where `storages.user_id` = `user_id`.
 

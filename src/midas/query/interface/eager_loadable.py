@@ -6,7 +6,7 @@ from midas.db import Base
 
 class EagerLoadable[T: Base, ID](ABC):
     """
-    Interface for `Repository` family classes. This repository defines
+    Interface for `Repository` family classes. This interface defines
     methods to implement for repositories that support eager loading
     techniques of sqlalchemy.
     """

@@ -9,7 +9,7 @@ from midas.db.schemas.event import Event
 from midas.query.event import EventRepository
 from midas.query.user import UserRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
-from midas.util.enums import TransactionType
+from midas.util.enums import EventFrequency, TransactionType
 
 
 class CreateEventUsecase(AbstractUsecase[None]):
@@ -26,7 +26,7 @@ class CreateEventUsecase(AbstractUsecase[None]):
         transaction_type: TransactionType,
         title: str,
         amount: Decimal,
-        update_interval: int,
+        frequency: EventFrequency,
         description: Optional[str] = None,
     ) -> None:
         """
@@ -67,9 +67,9 @@ class CreateEventUsecase(AbstractUsecase[None]):
                 title=title,
                 description=description,
                 amount=amount,
-                last_run_on=today,
-                interval=update_interval,
-                next_run_on=today + timedelta(days=update_interval),
+                last_run_on=today,  # even if it's not true
+                interval=frequency,
+                next_run_on=today + timedelta(days=frequency),
             )
             self._event_repo.add(event)
 

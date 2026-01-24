@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.query.event.repository import EventRepository
 from midas.usecase.event import CreateEventUsecase
-from midas.util.enums import Currency, TransactionType
+from midas.util.enums import Currency, EventFrequency, TransactionType
 
 
 @fixture
@@ -27,7 +27,7 @@ async def test_create_event_without_description(
         "transaction_type": TransactionType.BILLS_AND_FEES,
         "title": "Monthly rent",
         "amount": Decimal(400),
-        "update_interval": 30,
+        "frequency": EventFrequency.MONTHLY,
     }
     await test_create_event.execute(**event_data)
 
@@ -41,7 +41,7 @@ async def test_create_event_without_description(
         assert event.transaction_type_id == event_data["transaction_type"]
         assert event.title == event_data["title"]
         assert event.amount == event_data["amount"]
-        assert event.interval == event_data["update_interval"]
+        assert event.interval == event_data["frequency"]
         assert event.description is None
 
 
@@ -58,7 +58,7 @@ async def test_create_event_with_description(
         "transaction_type": TransactionType.BILLS_AND_FEES,
         "title": "Monthly rent",
         "amount": Decimal(400),
-        "update_interval": 30,
+        "frequency": EventFrequency.MONTHLY,
         "description": "Made up description",
     }
     await test_create_event.execute(**event_data)
@@ -73,7 +73,7 @@ async def test_create_event_with_description(
         assert event.transaction_type_id == event_data["transaction_type"]
         assert event.title == event_data["title"]
         assert event.amount == event_data["amount"]
-        assert event.interval == event_data["update_interval"]
+        assert event.interval == event_data["frequency"]
         assert event.description == event_data["description"]
 
 
@@ -84,7 +84,7 @@ async def test_create_event_for_invalid_user(test_create_event):
         "transaction_type": TransactionType.BILLS_AND_FEES,
         "title": "Monthly rent",
         "amount": Decimal(400),
-        "update_interval": 30,
+        "frequency": EventFrequency.DAILY,
         "description": "Made up description",
     }
 

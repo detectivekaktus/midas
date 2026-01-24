@@ -12,8 +12,8 @@ def get_event_frequencies_list() -> list[str]:
     :rtype: list[str]
     """
     type_map = {
-        EventFrequency.DAILY: "Daily 🌞",
-        EventFrequency.WEEKLY: "Weekly 🪂",
-        EventFrequency.MONTHLY: "Monthly 📅",
+        EventFrequency.DAILY: "🌞",
+        EventFrequency.WEEKLY: "🪂",
+        EventFrequency.MONTHLY: "📅",
     }
-    return [type_map[type_] for type_ in EventFrequency]
+    return [f"{type_map[type_]} {type_.name.capitalize()}" for type_ in EventFrequency]

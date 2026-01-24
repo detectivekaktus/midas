@@ -74,7 +74,7 @@ async def send_events_menu(
 ) -> None:
     if set_state:
         await state.set_state(MenuState.active)
-    await state.update_data(currnet=Menu.EVENTS, prev=Menu.MAIN)
+    await state.update_data(current=Menu.EVENTS, prev=Menu.MAIN)
     await message.answer(text, reply_markup=get_events_menu_keyboard())
 
 

@@ -16,7 +16,7 @@ def validate_event_frequency(text: str) -> EventFrequency:
         frequency = text.split(" ", 1)[-1].upper()
         return EventFrequency[frequency]
     except (IndexError, KeyError) as e:
-        raise ValueError(f"{text} is not a valid event frequency")
+        raise ValueError(f"{text} is not a valid event frequency") from e
 
 
 def valid_event_frequency_filter(

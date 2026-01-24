@@ -16,9 +16,9 @@ class Event(Base):
     title:                  varchar(64) not null
     description:            varchar(256)
     amount:                 Numeric(12, 2) not null
-    last_run_on:            timestamp (without tz) not null
+    last_run_on:            date not null
     interval:               int not null
-    next_run_on:            timestamp (without tz) not null
+    next_run_on:            date not null
     """
 
     __tablename__ = "events"

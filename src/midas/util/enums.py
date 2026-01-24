@@ -9,6 +9,7 @@ class Currency(IntEnum):
     Note that in case of adding more seed values you must update
     this enumeration.
     """
+
     EUR = 1
     USD = 2
     UAH = 3
@@ -22,16 +23,17 @@ class TransactionType(IntEnum):
     Note that in case of adding more seed values you must update
     this enumeration.
     """
-    INCOME          = 1
-    GROCERIES       = 2
-    TRANSPORTATION  = 3
-    ENTERTAINMENT   = 4
-    SHOPPING        = 5
-    GIFTS           = 6
-    BILLS_AND_FEES  = 7
-    HEALTHCARE      = 8
-    TRAVEL          = 9
-    OTHER           = 10
+
+    INCOME = 1
+    GROCERIES = 2
+    TRANSPORTATION = 3
+    ENTERTAINMENT = 4
+    SHOPPING = 5
+    GIFTS = 6
+    BILLS_AND_FEES = 7
+    HEALTHCARE = 8
+    TRAVEL = 9
+    OTHER = 10
 
     def readable(self) -> str:
         """
@@ -55,3 +57,16 @@ class TransactionType(IntEnum):
         """
         name = readable.upper().replace(" ", "_")
         return TransactionType[name]
+
+
+class EventFrequency(IntEnum):
+    """
+    Event frequency enum. Each element represents the `interval`
+    column of `events` table.
+
+    Each element corrisponds to the number of days to pass.
+    """
+
+    DAILY = 1
+    WEEKLY = 7
+    MONTHLY = 30

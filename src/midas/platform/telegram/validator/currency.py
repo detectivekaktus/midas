@@ -15,7 +15,7 @@ def validate_currency(text: str) -> Currency:
     """
     try:
         # "🇪🇺 EUR".split(" ")[1] = "EUR"
-        currency_code = text.split(" ")[1]
+        currency_code = text.split(" ", 1)[-1]
         return Currency[currency_code]
     except (IndexError, KeyError) as e:
         raise ValueError(f"{text} is not a valid currency") from e

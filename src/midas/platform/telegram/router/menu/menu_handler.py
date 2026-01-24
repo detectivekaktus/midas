@@ -10,6 +10,7 @@ from midas.util.enums import Currency
 from midas.platform.telegram.state.menu import MenuState
 from midas.platform.telegram.util.menu.events import (
     Menu,
+    send_events_menu,
     send_main_menu,
     send_profile_menu,
     send_transactions_menu,
@@ -33,6 +34,11 @@ async def handle_profile_menu(message: Message, state: FSMContext) -> None:
 @router.message(MenuState.active, F.text == MainMenuOption.TRANSACTIONS)
 async def handle_transactions_menu(message: Message, state: FSMContext) -> None:
     await send_transactions_menu(message, state)
+
+
+@router.message(MenuState.active, F.text == MainMenuOption.EVENTS)
+async def handle_events_menu(message: Message, state: FSMContext) -> None:
+    await send_events_menu(message, state)
 
 
 @router.message(Command("balance"))

@@ -8,10 +8,13 @@ from midas.db.schemas.account import Account
 from midas.db.schemas.transaction import Transaction
 from midas.query.interface.eager_loadable import EagerLoadable
 from midas.query import GenericRepository
+from midas.query.interface.purgeable import Purgeable
 
 
 class TransactionRepository(
-    GenericRepository[Transaction, UUID], EagerLoadable[Transaction, UUID]
+    GenericRepository[Transaction, UUID],
+    EagerLoadable[Transaction, UUID],
+    Purgeable,
 ):
     """
     Transaction repository class.
@@ -65,7 +68,8 @@ class TransactionRepository(
 
         return await super().get_by_id(id)
 
-    async def delete_all_by_user_id(self, user_id: int) -> None:
+    @override
+    async def purge_by_user_id(self, user_id: int) -> None:
         """
         DELETE all rows where `transactions.user_id` = `user_id`.
 

@@ -51,9 +51,9 @@ class DeleteUserUsecase(AbstractUsecase[None]):
                 )
                 raise ValueError(f"No user with {user_id} exists")
 
-            await self._transaction_repo.delete_all_by_user_id(user_id)
-            await self._storage_repo.delete_all_by_user_id(user_id)
-            await self._account_repo.delete_all_by_user_id(user_id)
+            await self._transaction_repo.purge_by_user_id(user_id)
+            await self._storage_repo.purge_by_user_id(user_id)
+            await self._account_repo.purge_by_user_id(user_id)
             await self._user_repo.delete_by_id(user_id)
             await self._session.commit()
 

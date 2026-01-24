@@ -3,7 +3,7 @@ from typing import Any, Optional
 from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from midas.loggers import aiogram_logger
 from midas.service.user_caching import CachedUser
@@ -13,6 +13,7 @@ from midas.usecase.transaction import CreateTransactionUsecase, EditTransactionU
 from midas.util.enums import TransactionType
 from midas.util.errors import NoChangesDetectedException
 
+from midas.platform.telegram.router.util import skipped_unskippable
 from midas.platform.telegram.keyboard import get_skip_keyboard
 from midas.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from midas.platform.telegram.state import FormMode
@@ -24,38 +25,6 @@ from midas.platform.telegram.util.menu.options import TransactionsMenuOption
 
 
 router = Router(name=__name__)
-
-
-async def skipped_unskippable(
-    message: Message,
-    mode: FormMode,
-    injected: Optional[Any] = object(),
-    reply_markup: Optional[ReplyKeyboardMarkup] = None,
-) -> bool:
-    """
-    Check if user input in `create` mode is skipped or invalid
-    by specifying `injected` argument.
-
-    If this condition is met, an error message is sent to the user.
-
-    :param message: telegram message
-    :type message: Message
-    :param mode: current form mode
-    :type mode: FormMode
-    :param injected: injected field by the filter
-    :type injected: Optional[Any]
-    :param reply_markup: telegram keyboard
-    :type reply_markup: Optional[ReplyKeyboardMarkup]
-    :return: `True` if input is valid, `False` otherwise
-    :rtype: bool
-    """
-    if mode == FormMode.CREATE and (
-        injected is None or message.text == SkipAnswer.SKIP
-    ):
-        await message.answer("You can't skip this option.", reply_markup=reply_markup)
-        return True
-
-    return False
 
 
 async def create_transaction(message: Message, state: FSMContext) -> None:
@@ -71,7 +40,7 @@ async def create_transaction(message: Message, state: FSMContext) -> None:
         aiogram_logger.error(f"Transaction creation failed: {data}")
         aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
         await send_transactions_menu(
-            message, state, "Failed. Something wrong happened.", set_state=True
+            message, state, "Failed. Something went wrong.", set_state=True
         )
 
 

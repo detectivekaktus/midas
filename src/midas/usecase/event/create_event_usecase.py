@@ -1,3 +1,4 @@
+from calendar import monthrange
 from datetime import date, timedelta
 from decimal import Decimal
 from typing import Optional, override
@@ -40,9 +41,9 @@ class CreateEventUsecase(AbstractUsecase[None]):
         :type title: str
         :param amount: transaction amount
         :type amount: Decimal
-        :param update_interval: interval in days of how often
+        :param frequency: interval in days of how often
         the event should be repeated
-        :type update_interval: int
+        :type frequency: EventFrequency
         :param description: optional transaction description
         :type description: Optional[str]
 
@@ -61,6 +62,13 @@ class CreateEventUsecase(AbstractUsecase[None]):
                 raise ValueError(f"No user with {user_id} exists")
 
             today = date.today()
+            delta = frequency
+            # if delta is anything but monthly, leave it as it is.
+            # if not, get the number of days of the month and use it as
+            # delta (28, 30 and 31)
+            if delta == EventFrequency.MONTHLY:
+                delta = monthrange(today.year, today.month)[1]
+
             event = Event(
                 user_id=user_id,
                 transaction_type_id=transaction_type,
@@ -69,7 +77,7 @@ class CreateEventUsecase(AbstractUsecase[None]):
                 amount=amount,
                 last_run_on=today,  # even if it's not true
                 interval=frequency,
-                next_run_on=today + timedelta(days=frequency),
+                next_run_on=today + timedelta(days=delta),
             )
             self._event_repo.add(event)
 

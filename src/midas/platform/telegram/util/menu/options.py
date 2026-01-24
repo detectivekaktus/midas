@@ -4,6 +4,7 @@ from enum import StrEnum
 class MainMenuOption(StrEnum):
     PROFILE = "👤 Profile"
     TRANSACTIONS = "🗂 Transactions"
+    EVENTS = "🗓️ Events"
     BALANCE = "🏦 See my balance"
 
 
@@ -23,3 +24,7 @@ class ProfileMenuOption(StrEnum):
 class TransactionsMenuOption(StrEnum):
     ADD = "✏️ Add new transaction"
     VIEW = "👀 View transactions"
+
+
+class EventMenuOption(StrEnum):
+    ADD = "🔔 Add new event"

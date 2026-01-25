@@ -66,10 +66,12 @@ class StorageRepository(
         self, user_id: int, count: int, eager: bool = False
     ) -> Sequence[Storage]:
         """
-        Get all accounts associated with `user_id` user.
+        Get `count` accounts associated with `user_id` user.
 
         :param user_id: user's telegram id.
         :type user_id: int
+        :param count: number of storages to get.
+        :type count: int
         :param eager: use eager loading.
         :type eager: bool
         :return: list of storages associated with the `user_id` user. The list

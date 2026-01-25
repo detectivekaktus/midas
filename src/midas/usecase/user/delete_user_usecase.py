@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from midas.loggers import app_logger
 
 from midas.query.account import AccountRepository
+from midas.query.event import EventRepository
 from midas.query.storage import StorageRepository
 from midas.query.transaction import TransactionRepository
 from midas.query.user import UserRepository
@@ -23,16 +24,18 @@ class DeleteUserUsecase(AbstractUsecase[None]):
         self._account_repo = AccountRepository(self._session)
         self._storage_repo = StorageRepository(self._session)
         self._transaction_repo = TransactionRepository(self._session)
+        self._event_repo = EventRepository(self._session)
 
     @override
     async def execute(self, user_id: int) -> None:
         """
         Delete all user-generated content and their profile.
 
-        First, this method deletes all storages associated with
-        the user profile. In the second place, all user accounts
-        are destroyed. Finally, the user row inside `users` table
-        is purged.
+        What's the subject of being purged:
+        * Transactions
+        * Storages
+        * Accounts
+        * Events
 
         NOTE: Changes done with this method are irreversible!
 
@@ -54,6 +57,7 @@ class DeleteUserUsecase(AbstractUsecase[None]):
             await self._transaction_repo.purge_by_user_id(user_id)
             await self._storage_repo.purge_by_user_id(user_id)
             await self._account_repo.purge_by_user_id(user_id)
+            await self._event_repo.purge_by_user_id(user_id)
             await self._user_repo.delete_by_id(user_id)
             await self._session.commit()
 

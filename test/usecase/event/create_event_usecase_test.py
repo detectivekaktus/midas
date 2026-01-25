@@ -1,17 +1,9 @@
 from decimal import Decimal
-from pytest import fixture, mark, raises
+from pytest import mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.query.event.repository import EventRepository
-from midas.usecase.event import CreateEventUsecase
 from midas.util.enums import Currency, EventFrequency, TransactionType
-
-
-@fixture
-def test_create_event(test_engine) -> CreateEventUsecase:
-    session = AsyncSession(test_engine)
-    usecase = CreateEventUsecase(session=session)
-    return usecase
 
 
 @mark.asyncio
@@ -26,7 +18,7 @@ async def test_create_event_without_description(
         "user_id": user_id,
         "transaction_type": TransactionType.BILLS_AND_FEES,
         "title": "Monthly rent",
-        "amount": Decimal(400),
+        "amount": Decimal("400"),
         "frequency": EventFrequency.MONTHLY,
     }
     await test_create_event.execute(**event_data)
@@ -57,7 +49,7 @@ async def test_create_event_with_description(
         "user_id": user_id,
         "transaction_type": TransactionType.BILLS_AND_FEES,
         "title": "Monthly rent",
-        "amount": Decimal(400),
+        "amount": Decimal("400"),
         "frequency": EventFrequency.MONTHLY,
         "description": "Made up description",
     }
@@ -83,7 +75,7 @@ async def test_create_event_for_invalid_user(test_create_event):
         "user_id": 69420,
         "transaction_type": TransactionType.BILLS_AND_FEES,
         "title": "Monthly rent",
-        "amount": Decimal(400),
+        "amount": Decimal("400"),
         "frequency": EventFrequency.DAILY,
         "description": "Made up description",
     }

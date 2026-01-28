@@ -28,3 +28,4 @@ class TransactionsMenuOption(StrEnum):
 
 class EventMenuOption(StrEnum):
     ADD = "🔔 Add new event"
+    VIEW = "👀 View events"

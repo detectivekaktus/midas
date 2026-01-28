@@ -46,9 +46,9 @@ def render_event(event: Event, currency: Currency) -> str:
     last_run_date = event.last_run_on.strftime("%d/%m/%Y")
 
     text = (
-        f"{html.bold("EVENT")}"
-        f"Last time occured on {last_run_date}"
-        f"Runs {html.italic(frequency)}"
+        f"{html.bold("EVENT")}\n"
+        f"Last time occured on {last_run_date}\n"
+        f"Runs {html.italic(frequency)}\n"
         f"📌 {event.title}\n"
         f"💳 {type_}\n"
         f"📝 {description if description else html.italic("No description provided")}\n"
@@ -98,11 +98,11 @@ async def handle_events_command(
     current = 0
     max_events = 16
     events = await get_events(user.id, max_events)
-    event = events[current]
 
     if len(events) == 0:
         await message.answer("Nothing to display ☹️")
         return
+    event = events[current]
 
     await remove_menu(message, state)
 
@@ -134,6 +134,10 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
         max_events *= 2
         events = await get_events(user.id, max_events)
         await state.update_data(events=events, max_events=max_events)
+        # if number of events after refetch remained the same
+        if len(events) == max_events / 2:
+            await query.answer("No more events avaiable.")
+            return
     await state.update_data(current=current)
 
     await answer_query(query, events[current], Currency(user.currency_id))

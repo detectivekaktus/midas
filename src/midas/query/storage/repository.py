@@ -78,7 +78,12 @@ class StorageRepository(
         may be empty if `user_id` is invalid.
         :rtype: Sequence[Storage]
         """
-        stmt = select(Storage).where(Storage.user_id == user_id).limit(count)
+        stmt = (
+            select(Storage)
+            .where(Storage.user_id == user_id)
+            .order_by(Storage.id)
+            .limit(count)
+        )
         if eager:
             stmt = stmt.options(selectinload(Storage.account))
 

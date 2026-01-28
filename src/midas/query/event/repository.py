@@ -35,7 +35,9 @@ class EventRepository(GenericRepository[Event, int], Purgeable, RetrievableByUse
         :rtype: Sequence[Event]
         """
         return (
-            await self._session.scalars(select(Event).where(Event.user_id == user_id))
+            await self._session.scalars(
+                select(Event).where(Event.user_id == user_id).order_by(Event.id)
+            )
         ).fetchmany(count)
 
     @override

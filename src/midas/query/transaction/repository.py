@@ -110,4 +110,4 @@ class TransactionRepository(
                 selectinload(Transaction.credit_account),
             )
 
-        return (await self._session.scalars(stmt)).all()
+        return (await self._session.scalars(stmt)).fetchall()

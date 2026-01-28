@@ -109,6 +109,7 @@ async def handle_transactions_command(
     if len(transactions) == 0:
         await message.answer("Nothing to display ☹️")
         return
+    transaction = transactions[current]
 
     await remove_menu(message, state)
 
@@ -120,7 +121,7 @@ async def handle_transactions_command(
     )
     await state.set_state(TransactionPaginationState.show)
 
-    text = render_transaction(transactions[current], Currency(user.currency_id))
+    text = render_transaction(transaction, Currency(user.currency_id))
     await message.answer(
         text, reply_markup=get_transaction_pagination_inline_keyboard()
     )
@@ -147,6 +148,10 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
         await state.update_data(
             transactions=transactions, max_transactions=max_transactions
         )
+        # if number of events after refetch remained the same
+        if len(transactions) == max_transactions / 2:
+            await query.answer("No more transactions available.")
+            return
     await state.update_data(current=current)
 
     await answer_query(query, transactions[current], Currency(user.currency_id))

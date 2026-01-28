@@ -11,3 +11,8 @@ class EventForm(StatesGroup):
     description = State()
     amount = State()
     frequency = State()
+
+
+class EventPaginationState(StatesGroup):
+    show = State()
+    confirm_delete = State()

@@ -7,12 +7,14 @@ from midas.db.schemas.storage import Storage
 from midas.query.interface.eager_loadable import EagerLoadable
 from midas.query import GenericRepository
 from midas.query.interface.purgeable import Purgeable
+from midas.query.interface.retrievable_by_user_id import RetrievableByUserId
 
 
 class StorageRepository(
     GenericRepository[Storage, int],
     EagerLoadable[Storage, int],
     Purgeable,
+    RetrievableByUserId,
 ):
     """
     Storage repository class.
@@ -59,21 +61,29 @@ class StorageRepository(
 
         return await super().get_by_id(id)
 
+    @override
     async def get_by_user_id(
-        self, user_id: int, eager: bool = False
+        self, user_id: int, count: int, eager: bool = False
     ) -> Sequence[Storage]:
         """
-        Get all accounts associated with `user_id` user.
+        Get `count` accounts associated with `user_id` user.
 
         :param user_id: user's telegram id.
         :type user_id: int
+        :param count: number of storages to get.
+        :type count: int
         :param eager: use eager loading.
         :type eager: bool
         :return: list of storages associated with the `user_id` user. The list
         may be empty if `user_id` is invalid.
         :rtype: Sequence[Storage]
         """
-        stmt = select(Storage).where(Storage.user_id == user_id)
+        stmt = (
+            select(Storage)
+            .where(Storage.user_id == user_id)
+            .order_by(Storage.id)
+            .limit(count)
+        )
         if eager:
             stmt = stmt.options(selectinload(Storage.account))
 

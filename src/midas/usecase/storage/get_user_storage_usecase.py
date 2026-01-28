@@ -29,7 +29,7 @@ class GetUserStorageUsecase(AbstractUsecase[Storage]):
         :raise ValueError: if there's no user with `user_id`.
         """
         async with self._session:
-            storages = await self._storage_repo.get_by_user_id(user_id)
+            storages = await self._storage_repo.get_by_user_id(user_id, 16)
 
             if len(storages) == 0:
                 raise ValueError(f"No user with {user_id} id found")

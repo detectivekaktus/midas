@@ -1,5 +1,9 @@
+from asyncio import create_task, sleep
 from datetime import date, timedelta
+from time import perf_counter
 from typing import Any, override
+
+from midas.loggers import app_logger
 
 from midas.db.schemas.event import Event
 from midas.service.schedule.abstract_handler import AbstractHandler
@@ -11,9 +15,16 @@ from midas.util.enums import EventFrequency
 
 class EventHandler(AbstractHandler):
     @override
-    def __init__(self) -> None:
+    def __init__(self, update_interval: int = 600) -> None:
+        """
+        Create new event handler.
+
+        :param update_interval: seconds interval between updates
+        :type update_interval: int
+        """
         self._get_events = GetUpcomingEventsUsecase()
         self._create_transaction = CreateTransactionUsecase()
+        self._UPDATE_INTERVAL = update_interval
 
     def _event_to_transaction_scheme(self, event: Event) -> dict[str, Any]:
         scheme = {
@@ -30,18 +41,29 @@ class EventHandler(AbstractHandler):
 
     @override
     async def loop(self) -> None:
-        events = await self._get_events.execute()
-        if len(events) == 0:
-            return
+        while True:
+            app_logger.info("Started execution of event updates")
+            start = perf_counter()
 
-        for event in events:
-            data = self._event_to_transaction_scheme(event)
-            await self._create_transaction.execute(**data)
+            events = await self._get_events.execute()
+            for event in events:
+                data = self._event_to_transaction_scheme(event)
+                await self._create_transaction.execute(**data)
 
-            # this is a very dirty implementation
-            # i'm not supposed to access private member of a class
-            async with self._get_events.get_session():
-                today = date.today()
-                delta = determine_timedelta(EventFrequency(event.interval))
-                event.last_run_on = today
-                event.next_run_on = today + timedelta(days=delta)
+                # this is a very dirty implementation
+                # i'm not supposed to access private member of a class
+                async with self._get_events.get_session():
+                    today = date.today()
+                    delta = determine_timedelta(EventFrequency(event.interval))
+                    event.last_run_on = today
+                    event.next_run_on = today + timedelta(days=delta)
+
+            app_logger.info(
+                f"Finished updating {len(events)} events in {round(perf_counter() - start, 3)} seconds"
+            )
+            await sleep(self._UPDATE_INTERVAL)
+
+
+async def start_event_handling() -> None:
+    handler = EventHandler()
+    create_task(handler.loop())

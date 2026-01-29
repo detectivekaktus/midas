@@ -52,11 +52,13 @@ class EventHandler(AbstractHandler):
 
                 # this is a very dirty implementation
                 # i'm not supposed to access private member of a class
-                async with self._get_events.get_session():
+                session = self._get_events.get_session()
+                async with session:
                     today = date.today()
                     delta = determine_timedelta(EventFrequency(event.interval))
                     event.last_run_on = today
                     event.next_run_on = today + timedelta(days=delta)
+                    await session.commit()
 
             app_logger.info(
                 f"Finished updating {len(events)} events in {round(perf_counter() - start, 3)} seconds"

@@ -37,6 +37,15 @@ class AbstractUsecase[T](ABC):
         """
         self._session = session or create_session()
 
+    def get_session(self) -> AsyncSession:
+        """
+        Getter for AsyncSession used under the hood.
+
+        :return: usecase database session
+        :rtype: AsyncSession
+        """
+        return self._session
+
     @abstractmethod
     async def execute(self, *args, **kwargs) -> T:
         """

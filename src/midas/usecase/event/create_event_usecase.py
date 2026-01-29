@@ -10,6 +10,7 @@ from midas.db.schemas.event import Event
 from midas.query.event import EventRepository
 from midas.query.user import UserRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
+from midas.usecase.event.util import determine_timedelta
 from midas.util.enums import EventFrequency, TransactionType
 
 
@@ -62,12 +63,7 @@ class CreateEventUsecase(AbstractUsecase[None]):
                 raise ValueError(f"No user with {user_id} exists")
 
             today = date.today()
-            delta = frequency
-            # if delta is anything but monthly, leave it as it is.
-            # if not, get the number of days of the month and use it as
-            # delta (28, 30 and 31)
-            if delta == EventFrequency.MONTHLY:
-                delta = monthrange(today.year, today.month)[1]
+            delta = determine_timedelta(frequency)
 
             event = Event(
                 user_id=user_id,

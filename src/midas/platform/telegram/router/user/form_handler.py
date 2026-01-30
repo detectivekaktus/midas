@@ -105,6 +105,7 @@ async def handle_currency(
         return
 
     if mode == FormMode.CREATE:
+        await state.update_data(currency=currency)
         aiogram_logger.info(
             f"Confirmed registration: {await state.get_value("user_id")}"
         )

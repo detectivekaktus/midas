@@ -8,11 +8,13 @@ class AbstractNotifier(ABC):
     """
 
     @abstractmethod
-    async def notify(self, user_id: int) -> None:
+    async def notify(self, user_id: int, msg: str) -> None:
         """
         Send a notification to user by their id.
 
         :param user_id: user's id.
         :type user_id: int
+        :param msg: notification message
+        :type msg: str
         """
         ...

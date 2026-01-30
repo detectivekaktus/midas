@@ -6,6 +6,7 @@ from midas.db.schemas.user import User
 class CachedUser:
     id: int
     currency_id: int
+    send_notifications: bool
 
 
 class UserCacheStorage:
@@ -26,7 +27,7 @@ class UserCacheStorage:
         :return: Cached version of user
         :rtype: CachedUser
         """
-        cached_user = CachedUser(user.id, user.currency_id)
+        cached_user = CachedUser(user.id, user.currency_id, user.send_notifications)
         self._cache[cached_user.id] = cached_user
         return cached_user
 

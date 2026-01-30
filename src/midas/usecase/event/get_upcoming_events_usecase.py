@@ -19,6 +19,6 @@ class GetUpcomingEventsUsecase(AbstractUsecase[Sequence[Event]]):
         app_logger.debug("Started `GetUpcomingEventsUsecase` execution")
 
         async with self._session:
-            events = await self._event_repo.get_upcoming_events()
+            events = await self._event_repo.get_upcoming_events(eager=True)
             app_logger.debug("Successfully returned upcoming events back")
             return events

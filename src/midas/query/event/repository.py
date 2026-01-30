@@ -2,6 +2,7 @@ from datetime import date
 from typing import Sequence, override
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from midas.db.schemas.event import Event
 from midas.query import GenericRepository
@@ -45,7 +46,7 @@ class EventRepository(GenericRepository[Event, int], Purgeable, RetrievableByUse
     async def purge_by_user_id(self, user_id: int) -> None:
         await self._session.execute(delete(Event).where(Event.user_id == user_id))
 
-    async def get_upcoming_events(self) -> Sequence[Event]:
+    async def get_upcoming_events(self, eager: bool = False) -> Sequence[Event]:
         """
         Get events with `next_run_on` date set to today or prior.
 
@@ -53,6 +54,9 @@ class EventRepository(GenericRepository[Event, int], Purgeable, RetrievableByUse
         :rtype: Sequence[Event]
         """
         today = date.today()
-        return (
-            await self._session.scalars(select(Event).where(Event.next_run_on <= today))
-        ).fetchall()
+        stmt = select(Event).where(Event.next_run_on <= today)
+
+        if eager:
+            stmt = stmt.options(selectinload(Event.user))
+
+        return (await self._session.scalars(stmt)).fetchall()

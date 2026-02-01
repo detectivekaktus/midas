@@ -52,6 +52,11 @@ class EventHandler(AbstractHandler):
                 data = self._event_to_transaction_scheme(event)
                 await self._create_transaction.execute(**data)
 
+                if event.user.send_notifications:
+                    await self._notifier.notify(
+                        event.user_id, f"New event: {event.title}"
+                    )
+
                 # this is a very dirty implementation
                 # i'm not supposed to access private member of a class
                 session = self._get_events.get_session()
@@ -60,12 +65,9 @@ class EventHandler(AbstractHandler):
                     delta = determine_timedelta(EventFrequency(event.interval))
                     event.last_run_on = today
                     event.next_run_on = today + timedelta(days=delta)
-                    await session.commit()
 
-                if event.user.send_notifications:
-                    await self._notifier.notify(
-                        event.user_id, f"New event: {event.title}"
-                    )
+                    session.add(event)
+                    await session.commit()
 
             app_logger.info(
                 f"Finished updating {len(events)} events in {round(perf_counter() - start, 3)} seconds"

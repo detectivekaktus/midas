@@ -64,7 +64,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 app_logger.debug(
                     "Finished `CreateTransactionUsecase` execution too soon because user does not exist"
                 )
-                raise ValueError(f"No user with {user_id} exists")
+                raise ValueError(f"No user with {user_id=} exists")
 
             # this is guaranteed to be an account instance because user exists.
             income_account: Account = (

@@ -91,6 +91,6 @@ class GenericRepository[T: Base, ID]:
         """
         entity = await self._session.get(self._model, id)
         if not entity:
-            raise ValueError(f"No entity with id {id} exists")
+            raise ValueError(f"No entity with id {id=} exists")
 
         await self._session.delete(entity)

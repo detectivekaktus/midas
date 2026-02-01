@@ -52,7 +52,7 @@ class DeleteUserUsecase(AbstractUsecase[None]):
                 app_logger.debug(
                     "Finished `DeleteUserUsecase` execution too soon because user does not exist"
                 )
-                raise ValueError(f"No user with {user_id} exists")
+                raise ValueError(f"No user with {user_id=} exists")
 
             await self._transaction_repo.purge_by_user_id(user_id)
             await self._storage_repo.purge_by_user_id(user_id)

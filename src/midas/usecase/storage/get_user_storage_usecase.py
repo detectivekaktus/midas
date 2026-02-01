@@ -32,6 +32,6 @@ class GetUserStorageUsecase(AbstractUsecase[Storage]):
             storages = await self._storage_repo.get_by_user_id(user_id, 16)
 
             if len(storages) == 0:
-                raise ValueError(f"No user with {user_id} id found")
+                raise ValueError(f"No user with {user_id=} id found")
 
             return storages[index]

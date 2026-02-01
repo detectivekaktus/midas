@@ -18,7 +18,7 @@ def validate_currency(text: str) -> Currency:
         currency_code = text.split(" ", 1)[-1]
         return Currency[currency_code]
     except (IndexError, KeyError) as e:
-        raise ValueError(f"{text} is not a valid currency") from e
+        raise ValueError(f"`{text}` is not a valid currency") from e
 
 
 def valid_currency_filter(message: Message) -> dict[str, Currency] | None:

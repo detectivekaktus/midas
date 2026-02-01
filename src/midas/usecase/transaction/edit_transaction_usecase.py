@@ -223,7 +223,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         async with self._session:
             transaction = await self._transaction_repo.get_by_id(id, eager=True)
             if transaction is None:
-                raise ValueError(f"No transaction with {id} found")
+                raise ValueError(f"No transaction with {id=} found")
 
             updates = self._get_effective_updates(
                 transaction, transaction_type, title, amount, description

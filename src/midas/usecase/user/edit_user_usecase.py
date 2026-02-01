@@ -75,7 +75,7 @@ class EditUserUsecase(AbstractUsecase[None]):
         async with self._session:
             user = await self._user_repo.get_by_id(user_id)
             if user is None:
-                raise ValueError(f"No user with {user_id} id was found")
+                raise ValueError(f"No user with {user_id=} id was found")
 
             updates = self._get_effective_updates(user, currency, send_notifications)
             for k, v in updates.items():

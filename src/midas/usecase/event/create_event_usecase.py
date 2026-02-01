@@ -60,7 +60,7 @@ class CreateEventUsecase(AbstractUsecase[None]):
                 app_logger.debug(
                     "Finished `CreateEventUsecase` execution too soon because user does not exist"
                 )
-                raise ValueError(f"No user with {user_id} exists")
+                raise ValueError(f"No user with {user_id=} exists")
 
             today = date.today()
             delta = determine_timedelta(frequency)

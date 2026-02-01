@@ -38,7 +38,7 @@ class DeleteTransactionUsecase(AbstractUsecase[None]):
         async with self._session:
             transaction = await self._transaction_repo.get_by_id(id, eager=True)
             if transaction is None:
-                raise ValueError(f"No transaction with {id} is found")
+                raise ValueError(f"No transaction with {id=} is found")
 
             debit_account: Account = transaction.debit_account
             credit_account: Account = transaction.credit_account

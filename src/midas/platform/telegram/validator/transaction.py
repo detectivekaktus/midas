@@ -18,7 +18,7 @@ def validate_transaction_type(text: str) -> TransactionType:
         text = text.split(" ", 1)[-1]
         return TransactionType.from_readable(text)
     except KeyError as e:
-        raise ValueError(f"{text} is not a valid transaction type") from e
+        raise ValueError(f"`{text}` is not a valid transaction type") from e
 
 
 def valid_transaction_type_filter(

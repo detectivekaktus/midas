@@ -22,6 +22,9 @@ class DeleteTransactionUsecase(AbstractUsecase[None]):
         super().__init__(session)
         self._transaction_repo = TransactionRepository(self._session)
 
+    # TODO: add method overloading allowing to pass directly `Transaction`
+    # object instead of the id, so no resources are wasted by making an
+    # unnecessary fetch
     @override
     async def execute(self, id: UUID) -> None:
         """

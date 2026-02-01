@@ -130,7 +130,6 @@ async def handle_invalid_currency(message: Message, state: FSMContext) -> None:
     )
 
 
-@router.message(UserForm.notifications)
 @router.message(UserForm.notifications, F.text == YesNoAnswer.YES)
 @router.message(UserForm.notifications, F.text == YesNoAnswer.NO)
 async def handle_notifications(message: Message, state: FSMContext) -> None:

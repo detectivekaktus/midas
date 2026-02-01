@@ -32,8 +32,8 @@ class EditUserUsecase(AbstractUsecase[None]):
 
         Any `None` fields aren't counter as well as any identical fields.
 
-        :raise ValueError: if all optional fields are `None` or if changes
-        are identical to source user.
+        :raise NoChangesDetectedException: if all optional fields are `None`
+        or if changes are identical to source user.
         """
         fields = {"currency_id": currency, "send_notifications": send_notifications}
 

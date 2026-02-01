@@ -10,3 +10,4 @@ class UserForm(StatesGroup):
     """
 
     currency = State()
+    notifications = State()

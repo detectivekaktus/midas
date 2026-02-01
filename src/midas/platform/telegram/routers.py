@@ -1,5 +1,7 @@
 from aiogram import Dispatcher
 
+from midas.platform.telegram.handlers import start_event_handling
+
 from .router import router as global_router
 from .router.user import router as user_router
 from .router.transaction import router as transaction_router
@@ -10,6 +12,10 @@ from .middleware import AuthMiddleware
 # Global dispatcher (Router) object.
 # Attach new routers to it as needed.
 dp = Dispatcher()
+
+# register coroutines to be attached to the main loop
+# of aiogram
+dp.startup.register(start_event_handling)
 
 for middleware in [AuthMiddleware()]:
     dp.message.middleware(middleware)

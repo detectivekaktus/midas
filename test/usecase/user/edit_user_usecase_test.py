@@ -32,6 +32,26 @@ async def test_register_user_and_change_their_currency(
 
 
 @mark.asyncio
+async def test_register_user_and_change_all_their_properties(
+    test_register_usecase, test_get_usecase, test_edit_user
+):
+    user_id = 123456789
+    currency = Currency.EUR
+
+    await test_register_usecase.execute(user_id, currency)
+    old_user = await test_get_usecase.execute(user_id)
+
+    await test_edit_user.execute(user_id, Currency.USD, send_notifications=False)
+    new_user = await test_get_usecase.execute(user_id)
+
+    assert old_user.id == new_user.id
+    assert old_user.currency_id == Currency.EUR
+    assert old_user.send_notifications
+    assert new_user.currency_id == Currency.USD
+    assert not new_user.send_notifications
+
+
+@mark.asyncio
 async def test_change_invalid_user(test_edit_user):
     with raises(ValueError):
         await test_edit_user.execute(69420, Currency.UAH)

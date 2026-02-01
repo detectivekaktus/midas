@@ -1,6 +1,6 @@
 from aiogram import Dispatcher
 
-from midas.service.schedule import start_event_handling
+from midas.platform.telegram.handlers import start_event_handling
 
 from .router import router as global_router
 from .router.user import router as user_router

@@ -1,4 +1,4 @@
-from asyncio import create_task, sleep
+from asyncio import sleep
 from datetime import date, timedelta
 from time import perf_counter
 from typing import Any, override
@@ -6,18 +6,17 @@ from typing import Any, override
 from midas.loggers import app_logger
 
 from midas.db.schemas.event import Event
+from midas.service.abstract_notifier import AbstractNotifier
 from midas.service.schedule.abstract_handler import AbstractHandler
 from midas.usecase.event import GetUpcomingEventsUsecase
 from midas.usecase.event.util import determine_timedelta
 from midas.usecase.transaction import CreateTransactionUsecase
 from midas.util.enums import EventFrequency
 
-from midas.platform.telegram.service.notifier import TelegramNotifier
-
 
 class EventHandler(AbstractHandler):
     @override
-    def __init__(self, update_interval: int = 600) -> None:
+    def __init__(self, notifier: AbstractNotifier, update_interval: int = 600) -> None:
         """
         Create new event handler.
 
@@ -26,8 +25,8 @@ class EventHandler(AbstractHandler):
         """
         self._get_events = GetUpcomingEventsUsecase()
         self._create_transaction = CreateTransactionUsecase()
+        self._notifier = notifier
         self._UPDATE_INTERVAL = update_interval
-        self._notifier = TelegramNotifier()
 
     def _event_to_transaction_scheme(self, event: Event) -> dict[str, Any]:
         scheme = {
@@ -72,8 +71,3 @@ class EventHandler(AbstractHandler):
                 f"Finished updating {len(events)} events in {round(perf_counter() - start, 3)} seconds"
             )
             await sleep(self._UPDATE_INTERVAL)
-
-
-async def start_event_handling() -> None:
-    handler = EventHandler()
-    create_task(handler.loop())

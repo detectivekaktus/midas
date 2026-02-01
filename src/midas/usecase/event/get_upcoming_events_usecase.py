@@ -9,6 +9,11 @@ from midas.usecase.abstract_usecase import AbstractUsecase
 
 
 class GetUpcomingEventsUsecase(AbstractUsecase[Sequence[Event]]):
+    """
+    Get upcoming events usecase. Instantiate this class if you want to
+    get events due to execute.
+    """
+
     @override
     def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
@@ -16,6 +21,12 @@ class GetUpcomingEventsUsecase(AbstractUsecase[Sequence[Event]]):
 
     @override
     async def execute(self) -> Sequence[Event]:
+        """
+        Fetch all events with `run_next_on` field set to today or earlier.
+
+        :return: list of events with `run_next_on` <= `date.today()`
+        :rtype: Sequence[Event]
+        """
         app_logger.debug("Started `GetUpcomingEventsUsecase` execution")
 
         async with self._session:

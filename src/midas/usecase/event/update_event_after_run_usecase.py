@@ -12,6 +12,11 @@ from midas.util.enums import EventFrequency
 
 
 class UpdateEventAfterRunUsecase(AbstractUsecase[None]):
+    """
+    Update event after run usecase. This usecase has exactly one use, which
+    is in the event scheduler. Do not use it anywhere else.
+    """
+
     @override
     def __init__(self, session: AsyncSession | None = None) -> None:
         super().__init__(session)
@@ -21,6 +26,13 @@ class UpdateEventAfterRunUsecase(AbstractUsecase[None]):
     # of event object
     @override
     async def execute(self, event: Event) -> None:
+        """
+        Set event's `last_run_on` field to today and increment `next_run_on`
+        based on the `interval`.
+
+        :param event: event to be updated
+        :type event: Event
+        """
         app_logger.debug("Started `UpdateEventAfterRunUsecase` execution")
 
         async with self._session:

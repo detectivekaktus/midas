@@ -1,5 +1,4 @@
 from asyncio import sleep
-from datetime import date, timedelta
 from time import perf_counter
 from typing import Any, override
 
@@ -8,10 +7,8 @@ from midas.loggers import app_logger
 from midas.db.schemas.event import Event
 from midas.service.abstract_notifier import AbstractNotifier
 from midas.service.schedule.abstract_handler import AbstractHandler
-from midas.usecase.event import GetUpcomingEventsUsecase
-from midas.usecase.event.util import determine_timedelta
+from midas.usecase.event import GetUpcomingEventsUsecase, UpdateEventAfterRunUsecase
 from midas.usecase.transaction import CreateTransactionUsecase
-from midas.util.enums import EventFrequency
 
 
 class EventHandler(AbstractHandler):
@@ -24,6 +21,7 @@ class EventHandler(AbstractHandler):
         :type update_interval: int
         """
         self._get_events = GetUpcomingEventsUsecase()
+        self._update_event = UpdateEventAfterRunUsecase()
         self._create_transaction = CreateTransactionUsecase()
         self._notifier = notifier
         self._UPDATE_INTERVAL = update_interval
@@ -57,17 +55,7 @@ class EventHandler(AbstractHandler):
                         event.user_id, f"New event: {event.title}"
                     )
 
-                # this is a very dirty implementation
-                # i'm not supposed to access private member of a class
-                session = self._get_events.get_session()
-                async with session:
-                    today = date.today()
-                    delta = determine_timedelta(EventFrequency(event.interval))
-                    event.last_run_on = today
-                    event.next_run_on = today + timedelta(days=delta)
-
-                    session.add(event)
-                    await session.commit()
+                await self._update_event.execute(event)
 
             app_logger.info(
                 f"Finished updating {len(events)} events in {round(perf_counter() - start, 3)} seconds"

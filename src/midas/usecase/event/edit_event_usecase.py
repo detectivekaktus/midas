@@ -62,11 +62,11 @@ class EditEventUsecase(AbstractUsecase[None]):
     async def execute(
         self,
         id: int,
-        transaction_type: Optional[TransactionType],
-        title: Optional[str],
-        amount: Optional[Decimal],
-        description: Optional[str],
-        frequency: Optional[EventFrequency],
+        transaction_type: Optional[TransactionType] = None,
+        title: Optional[str] = None,
+        amount: Optional[Decimal] = None,
+        description: Optional[str] = None,
+        frequency: Optional[EventFrequency] = None,
     ) -> None:
         """
         Edit an existing event.

@@ -3,6 +3,7 @@ from .get_events_usecase import GetEventsUsecase
 from .get_upcoming_events_usecase import GetUpcomingEventsUsecase
 from .update_event_after_run_usecase import UpdateEventAfterRunUsecase
 from .delete_event_usecase import DeleteEventUsecase
+from .edit_event_usecase import EditEventUsecase
 
 __all__ = (
     "CreateEventUsecase",
@@ -10,4 +11,5 @@ __all__ = (
     "GetUpcomingEventsUsecase",
     "UpdateEventAfterRunUsecase",
     "DeleteEventUsecase",
+    "EditEventUsecase",
 )

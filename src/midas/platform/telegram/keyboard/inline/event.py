@@ -27,6 +27,10 @@ def get_event_pagination_inline_keyboard() -> InlineKeyboardMarkup:
         callback_data=EventPaginationCommand(command=Command.PREV),
     )
     builder.button(
+        text="❌",
+        callback_data=EventPaginationCommand(command=Command.DELETE),
+    )
+    builder.button(
         text="▶️",
         callback_data=EventPaginationCommand(command=Command.NEXT),
     )

@@ -107,7 +107,8 @@ async def handle_events_command(
     events = await get_events(user.id, max_events)
 
     if len(events) == 0:
-        await message.answer("Nothing to display ☹️")
+        await state.clear()
+        await send_main_menu(message, state, "Nothing to display ☹️")
         return
     event = events[current]
 
@@ -134,6 +135,7 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
     events: Sequence[Event] = data["events"]
 
     current += 1
+    # refactor this monstrosity
     if len(events) != max_events and len(events) == current:
         await query.answer("No more events avaiable.")
         return
@@ -210,9 +212,7 @@ async def handle_confirm_delete_callback_query(
 
     if len(events) == 1:
         await state.clear()
-        await message.answer(
-            text="Nothing to display ☹️", reply_markup=ReplyKeyboardRemove()
-        )
+        await send_main_menu(message, state, "Nothing to display ☹️")
         return
 
     events.pop(current)

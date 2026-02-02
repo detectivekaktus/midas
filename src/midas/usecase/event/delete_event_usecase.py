@@ -29,7 +29,7 @@ class DeleteEventUsecase(AbstractUsecase[None]):
         :raises ValueError: if no event with `id` exists.
         """
         async with self._session:
-            event = self._event_repo.get_by_id(id)
+            event = await self._event_repo.get_by_id(id)
             if event is None:
                 raise ValueError(f"No event with {id=} exists")
 

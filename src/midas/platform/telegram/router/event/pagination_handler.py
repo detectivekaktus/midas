@@ -24,12 +24,14 @@ from midas.usecase.event import DeleteEventUsecase, GetEventsUsecase
 from midas.util.enums import Currency, EventFrequency, TransactionType
 
 from midas.platform.telegram.keyboard import get_yes_no_keyboard
+from midas.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from midas.platform.telegram.keyboard.inline.event import (
     EventPaginationCommand,
     Command as PaginationCommand,
     get_event_pagination_inline_keyboard,
 )
-from midas.platform.telegram.state.event import EventPaginationState
+from midas.platform.telegram.state import FormMode
+from midas.platform.telegram.state.event import EventForm, EventPaginationState
 from midas.platform.telegram.validator import YesNoAnswer
 from midas.platform.telegram.util.menu.events import remove_menu, send_main_menu
 from midas.platform.telegram.util.menu.options import EventMenuOption
@@ -247,6 +249,40 @@ async def handle_invalid_delete_option(message: Message) -> None:
     await message.answer(
         "Please, select a valid option.", reply_markup=get_yes_no_keyboard()
     )
+
+
+@router.callback_query(
+    EventPaginationCommand.filter(F.command == PaginationCommand.EDIT),
+    EventPaginationState.show,
+)
+async def handle_edit_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+
+    mode: FormMode = FormMode.EDIT
+    user: CachedUser = data["user"]
+    events: Sequence[Event] = data["events"]
+    current: int = data["current"]
+    event: Event = events[current]
+
+    aiogram_logger.info(f"Received event edit command: {user.id} - {event.id}")
+    await state.clear()
+
+    await state.set_state(EventForm.transaction_type)
+    await state.update_data(user_id=user.id, mode=mode, event=event)
+
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
+        return
+
+    transaction_type: str = TransactionType(event.transaction_type_id).readable()
+    await query.answer()
+    await message.answer(
+        f"Enter new transaction type. (current: {transaction_type})",
+        reply_markup=get_transaction_type_keyboard(skippable=True),
+    )
+    # see form_handler.py handlers
 
 
 @router.callback_query(

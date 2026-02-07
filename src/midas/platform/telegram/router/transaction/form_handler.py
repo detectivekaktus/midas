@@ -57,9 +57,6 @@ async def edit_transaction(message: Message, state: FSMContext) -> None:
         await usecase.execute(**data)
         await send_transactions_menu(message, state, "👍", set_state=True)
     except NoChangesDetectedException:
-        aiogram_logger.info(
-            f"Transaction edit failed due to insufficient fields: {data.get("user_id")}"
-        )
         await send_transactions_menu(
             message, state, "Failed. You must specify at least 1 field.", set_state=True
         )
@@ -67,7 +64,7 @@ async def edit_transaction(message: Message, state: FSMContext) -> None:
         aiogram_logger.error(f"Transaction edit failed: {data}")
         aiogram_logger.error(f"The problem to this was the following exception:\n{e}")
         await send_transactions_menu(
-            message, state, "Failed. Something wrong happened.", set_state=True
+            message, state, "Failed. Something went wrong.", set_state=True
         )
 
 

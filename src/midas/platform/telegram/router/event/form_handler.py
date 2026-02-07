@@ -8,8 +8,10 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from midas.loggers import aiogram_logger
 from midas.service.user_caching import CachedUser
 
-from midas.usecase.event import CreateEventUsecase
+from midas.db.schemas.event import Event
+from midas.usecase.event import CreateEventUsecase, EditEventUsecase
 from midas.util.enums import EventFrequency, TransactionType
+from midas.util.errors import NoChangesDetectedException
 
 from midas.platform.telegram.router.util import skipped_unskippable
 from midas.platform.telegram.keyboard import get_skip_keyboard
@@ -37,6 +39,30 @@ async def create_event(message: Message, state: FSMContext) -> None:
         await send_events_menu(message, state, "👍", set_state=True)
     except Exception as e:
         aiogram_logger.error(f"Event creation failed: {data}")
+        aiogram_logger.error(f"The problem to this was the following exception: {e}")
+        await send_events_menu(
+            message, state, "Failed. Something went wrong.", set_state=True
+        )
+
+
+async def edit_event(message: Message, state: FSMContext) -> None:
+    data = {
+        k: v
+        for k, v in (await state.get_data()).items()
+        if k not in ("user_id", "mode", "event")
+    }
+    await state.clear()
+
+    try:
+        usecase = EditEventUsecase()
+        await usecase.execute(**data)
+        await send_events_menu(message, state, "👍", set_state=True)
+    except NoChangesDetectedException:
+        await send_events_menu(
+            message, state, "Failed. You must specify at least 1 field.", set_state=True
+        )
+    except Exception as e:
+        aiogram_logger.error(f"Event edit failed: {data}")
         aiogram_logger.error(f"The problem to this was the following exception: {e}")
         await send_events_menu(
             message, state, "Failed. Something went wrong.", set_state=True
@@ -79,6 +105,15 @@ async def handle_valid_type(
             "Enter the event title. It will be set as title for all subsequent transactions created under this event.",
             reply_markup=ReplyKeyboardRemove(),
         )
+    else:
+        if transaction_type is not None and message.text != SkipAnswer.SKIP:
+            await state.update_data(transaction_type=transaction_type)
+
+        event: Event = await state.get_value("event")  # type: ignore
+        await message.answer(
+            f"Enter new event title. (current: {event.title})",
+            reply_markup=get_skip_keyboard(),
+        )
 
     await state.set_state(EventForm.title)
 
@@ -101,6 +136,15 @@ async def handle_valid_title(message: Message, state: FSMContext) -> None:
         await message.answer(
             "Optional: add a description", reply_markup=get_skip_keyboard()
         )
+    else:
+        if message.text != SkipAnswer.SKIP:
+            await state.update_data(title=message.text)
+
+        event: Event = await state.get_value("event")  # type: ignore
+        await message.answer(
+            f"Add new description. (current: {event.description})",
+            reply_markup=get_skip_keyboard(),
+        )
 
     await state.set_state(EventForm.description)
 
@@ -120,6 +164,12 @@ async def handle_valid_description(message: Message, state: FSMContext) -> None:
     if mode == FormMode.CREATE:
         await message.answer(
             "Enter the transaction amount.", reply_markup=ReplyKeyboardRemove()
+        )
+    else:
+        event: Event = await state.get_value("event")  # type: ignore
+        await message.answer(
+            f"Enter new event amount. (current: {event.amount})",
+            reply_markup=get_skip_keyboard(),
         )
 
     await state.set_state(EventForm.amount)
@@ -148,6 +198,16 @@ async def handle_valid_amount(
             "How often should the event occur?",
             reply_markup=get_event_frequency_keyboard(),
         )
+    else:
+        if amount is not None and message.text != SkipAnswer.SKIP:
+            await state.update_data(amount=amount)
+
+        event: Event = await state.get_value("event")  # type: ignore
+        frequency: str = EventFrequency(event.interval).name.capitalize()
+        await message.answer(
+            f"Enter new event frequency. (current: {frequency})",
+            reply_markup=get_event_frequency_keyboard(skippable=True),
+        )
 
     await state.set_state(EventForm.frequency)
 
@@ -174,6 +234,18 @@ async def handle_valid_frequency(
         )
         await state.update_data(frequency=frequency)
         await create_event(message, state)
+    else:
+        aiogram_logger.info(
+            f"Confirm event editing: {await state.get_value("user_id")}"
+        )
+
+        if frequency is not None and message.text != SkipAnswer.SKIP:
+            await state.update_data(frequency=frequency)
+
+        event: Event = await state.get_value("event")  # type: ignore
+        await state.update_data(id=event.id)
+
+        await edit_event(message, state)
 
 
 @router.message(EventForm.frequency)

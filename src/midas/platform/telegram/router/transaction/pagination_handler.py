@@ -107,7 +107,8 @@ async def handle_transactions_command(
     transactions = await get_transactions(user.id, max_transactions)
 
     if len(transactions) == 0:
-        await message.answer("Nothing to display ☹️")
+        await state.clear()
+        await send_main_menu(message, state, "Nothing to display ☹️")
         return
     transaction = transactions[current]
 
@@ -216,9 +217,7 @@ async def handle_confirm_delete_callback_query(
 
     if len(transactions) == 1:
         await state.clear()
-        await message.answer(
-            text="Nothing to display ☹️", reply_markup=ReplyKeyboardRemove()
-        )
+        await send_main_menu(message, state, "Nothing to display ☹️")
         return
 
     transactions.pop(current)

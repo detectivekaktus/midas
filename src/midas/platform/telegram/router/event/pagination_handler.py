@@ -9,21 +9,30 @@ from typing import Sequence
 from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, InaccessibleMessage, Message
+from aiogram.types import (
+    CallbackQuery,
+    InaccessibleMessage,
+    Message,
+    ReplyKeyboardRemove,
+)
 
 from midas.loggers import aiogram_logger
 from midas.service.user_caching import CachedUser
 
 from midas.db.schemas.event import Event
-from midas.usecase.event import GetEventsUsecase
+from midas.usecase.event import DeleteEventUsecase, GetEventsUsecase
 from midas.util.enums import Currency, EventFrequency, TransactionType
 
+from midas.platform.telegram.keyboard import get_yes_no_keyboard
+from midas.platform.telegram.keyboard.transaction import get_transaction_type_keyboard
 from midas.platform.telegram.keyboard.inline.event import (
     EventPaginationCommand,
-    Command as EventCommand,
+    Command as PaginationCommand,
     get_event_pagination_inline_keyboard,
 )
-from midas.platform.telegram.state.event import EventPaginationState
+from midas.platform.telegram.state import FormMode
+from midas.platform.telegram.state.event import EventForm, EventPaginationState
+from midas.platform.telegram.validator import YesNoAnswer
 from midas.platform.telegram.util.menu.events import remove_menu, send_main_menu
 from midas.platform.telegram.util.menu.options import EventMenuOption
 
@@ -100,7 +109,8 @@ async def handle_events_command(
     events = await get_events(user.id, max_events)
 
     if len(events) == 0:
-        await message.answer("Nothing to display ☹️")
+        await state.clear()
+        await send_main_menu(message, state, "Nothing to display ☹️")
         return
     event = events[current]
 
@@ -116,7 +126,7 @@ async def handle_events_command(
 
 
 @router.callback_query(
-    EventPaginationCommand.filter(F.command == EventCommand.NEXT),
+    EventPaginationCommand.filter(F.command == PaginationCommand.NEXT),
     EventPaginationState.show,
 )
 async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) -> None:
@@ -127,6 +137,7 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
     events: Sequence[Event] = data["events"]
 
     current += 1
+    # refactor this monstrosity
     if len(events) != max_events and len(events) == current:
         await query.answer("No more events avaiable.")
         return
@@ -144,7 +155,7 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
 
 
 @router.callback_query(
-    EventPaginationCommand.filter(F.command == EventCommand.PREV),
+    EventPaginationCommand.filter(F.command == PaginationCommand.PREV),
     EventPaginationState.show,
 )
 async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) -> None:
@@ -164,7 +175,118 @@ async def handle_prev_callback_query(query: CallbackQuery, state: FSMContext) ->
 
 
 @router.callback_query(
-    EventPaginationCommand.filter(F.command == EventCommand.EXIT),
+    EventPaginationCommand.filter(F.command == PaginationCommand.DELETE),
+    EventPaginationState.show,
+)
+async def handle_delete_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(EventPaginationState.confirm_delete)
+
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
+        return
+
+    await query.answer()
+    await message.answer(
+        "⚠️ Are you sure you want to delete this event?\n"
+        "Note that it won't delete the transactions produced by this event",
+        reply_markup=get_yes_no_keyboard(),
+    )
+
+
+@router.message(EventPaginationState.confirm_delete, F.text == YesNoAnswer.YES)
+async def handle_confirm_delete_callback_query(
+    message: Message, state: FSMContext
+) -> None:
+    data = await state.get_data()
+    user: CachedUser = data["user"]
+    current: int = data["current"]
+    events: list[Event] = data["events"]
+    deleted_event: Event = events[current]
+
+    aiogram_logger.info(
+        f"Received event delete command: {user.id} - {deleted_event.id}"
+    )
+
+    usecase = DeleteEventUsecase()
+    await usecase.execute(deleted_event.id)
+
+    if len(events) == 1:
+        await state.clear()
+        await send_main_menu(message, state, "Nothing to display ☹️")
+        return
+
+    events.pop(current)
+    current -= 1 if current != 0 else 0
+    await state.update_data(current=current, events=events)
+    await state.set_state(EventPaginationState.show)
+    await message.answer("👍", reply_markup=ReplyKeyboardRemove())
+
+    text = render_event(events[current], Currency(user.currency_id))
+    await message.answer(text, reply_markup=get_event_pagination_inline_keyboard())
+
+
+@router.message(EventPaginationState.confirm_delete, F.text == YesNoAnswer.NO)
+async def handle_reject_delete_callback_query(
+    message: Message, state: FSMContext
+) -> None:
+    data = await state.get_data()
+    user: CachedUser = data["user"]
+    current: int = data["current"]
+    events: Sequence[Event] = data["events"]
+    event = events[current]
+
+    await state.set_state(EventPaginationState.show)
+    await message.answer("Canceled deletion.", reply_markup=ReplyKeyboardRemove())
+
+    text = render_event(event, Currency(user.currency_id))
+    await message.answer(text, reply_markup=get_event_pagination_inline_keyboard())
+
+
+@router.message(EventPaginationState.confirm_delete)
+async def handle_invalid_delete_option(message: Message) -> None:
+    await message.answer(
+        "Please, select a valid option.", reply_markup=get_yes_no_keyboard()
+    )
+
+
+@router.callback_query(
+    EventPaginationCommand.filter(F.command == PaginationCommand.EDIT),
+    EventPaginationState.show,
+)
+async def handle_edit_callback_query(query: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+
+    mode: FormMode = FormMode.EDIT
+    user: CachedUser = data["user"]
+    events: Sequence[Event] = data["events"]
+    current: int = data["current"]
+    event: Event = events[current]
+
+    aiogram_logger.info(f"Received event edit command: {user.id} - {event.id}")
+    await state.clear()
+
+    await state.set_state(EventForm.transaction_type)
+    await state.update_data(user_id=user.id, mode=mode, event=event)
+
+    message = query.message
+    if not message or isinstance(message, InaccessibleMessage):
+        aiogram_logger.warning("Couldn't find message bound to the callback query.")
+        await query.answer("If you see this message, report a bug on github.")
+        return
+
+    transaction_type: str = TransactionType(event.transaction_type_id).readable()
+    await query.answer()
+    await message.answer(
+        f"Enter new transaction type. (current: {transaction_type})",
+        reply_markup=get_transaction_type_keyboard(skippable=True),
+    )
+    # see form_handler.py handlers
+
+
+@router.callback_query(
+    EventPaginationCommand.filter(F.command == PaginationCommand.EXIT),
     EventPaginationState.show,
 )
 async def handle_exit_callback_query(query: CallbackQuery, state: FSMContext) -> None:

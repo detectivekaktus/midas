@@ -5,8 +5,8 @@ def get_event_frequencies_list() -> list[str]:
     """
     Get displayed event frequency list.
 
-    This list is made of emojis corrisponding to the
-    `EventFrequencyu` enum elements.
+    This list is made of emojis corresponding to the
+    `EventFrequency` enum elements.
 
     :return: list of displayable event frequencies.
     :rtype: list[str]

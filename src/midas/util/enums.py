@@ -64,7 +64,10 @@ class EventFrequency(IntEnum):
     Event frequency enum. Each element represents the `interval`
     column of `events` table.
 
-    Each element corrisponds to the number of days to pass.
+    Each element corresponds to the number of days to pass.
+    For `MONTHLY`, the value is used as an identifier, and the actual
+    number of days for the interval is calculated dynamically
+    (see `determine_timedelta`).
     """
 
     DAILY = 1

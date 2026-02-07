@@ -139,7 +139,7 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
     current += 1
     # refactor this monstrosity
     if len(events) != max_events and len(events) == current:
-        await query.answer("No more events avaiable.")
+        await query.answer("No more events available.")
         return
     elif max_events == current:
         max_events *= 2
@@ -147,7 +147,7 @@ async def handle_next_callback_query(query: CallbackQuery, state: FSMContext) ->
         await state.update_data(events=events, max_events=max_events)
         # if number of events after refetch remained the same
         if len(events) == max_events / 2:
-            await query.answer("No more events avaiable.")
+            await query.answer("No more events available.")
             return
     await state.update_data(current=current)
 

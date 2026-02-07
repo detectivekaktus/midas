@@ -37,9 +37,8 @@ async def create_event(message: Message, state: FSMContext) -> None:
         usecase = CreateEventUsecase()
         await usecase.execute(**data)
         await send_events_menu(message, state, "👍", set_state=True)
-    except Exception as e:
-        aiogram_logger.error(f"Event creation failed: {data}")
-        aiogram_logger.error(f"The problem to this was the following exception: {e}")
+    except Exception:
+        aiogram_logger.error(f"Event creation failed: {data}", exc_info=True)
         await send_events_menu(
             message, state, "Failed. Something went wrong.", set_state=True
         )
@@ -61,9 +60,8 @@ async def edit_event(message: Message, state: FSMContext) -> None:
         await send_events_menu(
             message, state, "Failed. You must specify at least 1 field.", set_state=True
         )
-    except Exception as e:
-        aiogram_logger.error(f"Event edit failed: {data}")
-        aiogram_logger.error(f"The problem to this was the following exception: {e}")
+    except Exception:
+        aiogram_logger.error(f"Event edit failed: {data}", exc_info=True)
         await send_events_menu(
             message, state, "Failed. Something went wrong.", set_state=True
         )

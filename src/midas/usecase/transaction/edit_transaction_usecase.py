@@ -53,7 +53,7 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         updates = {
             k: v
             for k, v in fields.items()
-            if v is not None and getattr(transaction, k, v) != v
+            if v is not None and getattr(transaction, k) != v
         }
         if len(updates) == 0:
             raise NoChangesDetectedException("No valid updates found")

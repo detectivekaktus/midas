@@ -49,9 +49,7 @@ class EditEventUsecase(AbstractUsecase[None]):
         }
 
         updates = {
-            k: v
-            for k, v in fields.items()
-            if v is not None and getattr(event, k, v) != v
+            k: v for k, v in fields.items() if v is not None and getattr(event, k) != v
         }
         if len(updates) == 0:
             raise NoChangesDetectedException("No valid updates found")

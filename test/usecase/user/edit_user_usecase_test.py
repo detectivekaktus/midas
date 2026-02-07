@@ -1,9 +1,9 @@
 from pytest import fixture, mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.usecase.user import EditUserUsecase
-from src.util.enums import Currency
-from src.util.errors import NoChangesDetectedException
+from midas.usecase.user import EditUserUsecase
+from midas.util.enums import Currency
+from midas.util.errors import NoChangesDetectedException
 
 
 @fixture
@@ -29,6 +29,26 @@ async def test_register_user_and_change_their_currency(
     assert old_user.id == new_user.id
     assert old_user.currency_id == Currency.EUR
     assert new_user.currency_id == Currency.USD
+
+
+@mark.asyncio
+async def test_register_user_and_change_all_their_properties(
+    test_register_usecase, test_get_usecase, test_edit_user
+):
+    user_id = 123456789
+    currency = Currency.EUR
+
+    await test_register_usecase.execute(user_id, currency)
+    old_user = await test_get_usecase.execute(user_id)
+
+    await test_edit_user.execute(user_id, Currency.USD, send_notifications=False)
+    new_user = await test_get_usecase.execute(user_id)
+
+    assert old_user.id == new_user.id
+    assert old_user.currency_id == Currency.EUR
+    assert old_user.send_notifications
+    assert new_user.currency_id == Currency.USD
+    assert not new_user.send_notifications
 
 
 @mark.asyncio

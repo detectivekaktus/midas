@@ -11,14 +11,16 @@ Add storages to see how much you've got on your account at a given moment. Your 
 Got something you want to acquire? Midas got you covered with financial goal manager - see exactly how much you're left to save and when you'll end your goal, based on financial life in expense journal.
 
 ## Set up
-Install python 3.13.7 and the dependencies in `requirements.txt` file.
-
-To setup the PostgreSQL database, please, start PostgreSQL container and run:
+Install dependencies via poetry:
 ```sh
-alembic upgrade head
-python3 -m src.db.seed
+poetry install
 ```
-These commands will apply the latest migrations to the database and seed the necessary tables with sample and constant data.
+
+Setup the database with:
+```sh
+poetry run migrate
+poetry run seed
+```
 
 Start the application with docker by running:
 ```sh

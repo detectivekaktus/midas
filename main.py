@@ -1,7 +1,7 @@
 from asyncio import run
 
-from src.loggers import load_logging_config
-from src.platform.telegram import start_bot
+from midas.loggers import load_logging_config
+from midas.platform.telegram import start_bot
 
 
 async def main() -> None:

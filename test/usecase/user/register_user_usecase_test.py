@@ -1,11 +1,10 @@
 from pytest import mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.query.account import AccountRepository
-from src.query.storage import StorageRepository
-from src.query.user import UserRepository
-from src.util.enums import Currency, TransactionType
-
+from midas.query.account import AccountRepository
+from midas.query.storage import StorageRepository
+from midas.query.user import UserRepository
+from midas.util.enums import Currency, TransactionType
 
 
 @mark.asyncio

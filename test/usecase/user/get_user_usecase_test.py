@@ -2,7 +2,7 @@ from random import choice, randrange
 from pytest import mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.util.enums import Currency
+from midas.util.enums import Currency
 
 
 @mark.asyncio

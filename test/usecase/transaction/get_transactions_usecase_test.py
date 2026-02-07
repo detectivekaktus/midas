@@ -1,7 +1,7 @@
 from decimal import Decimal
 from pytest import fixture, mark
 
-from src.util.enums import Currency, TransactionType
+from midas.util.enums import Currency, TransactionType
 
 
 @mark.asyncio

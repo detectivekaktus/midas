@@ -2,8 +2,8 @@ from decimal import Decimal
 from pytest import fixture, mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.usecase.storage import GetUserStorageUsecase
-from src.util.enums import Currency, TransactionType
+from midas.usecase.storage import GetUserStorageUsecase
+from midas.util.enums import Currency, TransactionType
 
 
 @fixture

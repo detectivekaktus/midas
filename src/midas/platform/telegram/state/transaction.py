@@ -1,5 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 
+from midas.platform.telegram.util.rendering import PagerStatesGroup
+
 
 class TransactionForm(StatesGroup):
     """
@@ -12,6 +14,5 @@ class TransactionForm(StatesGroup):
     amount = State()
 
 
-class TransactionPaginationState(StatesGroup):
-    show = State()
-    confirm_delete = State()
+class TransactionPaginationState(PagerStatesGroup):
+    pass

@@ -74,7 +74,7 @@ async def test_get_many_events(
     events = await test_get_events.execute(user_id)
     assert len(events) == len(event_data)
 
-    for i, event in enumerate(events):
+    for i, event in enumerate(reversed(events)):
         assert event.user_id == event_data[i]["user_id"]
         assert event.transaction_type_id == event_data[i]["transaction_type"]
         assert event.title == event_data[i]["title"]

@@ -1,15 +1,24 @@
 from abc import ABC
 from typing import Any, override
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    Message,
+    ReplyKeyboardRemove,
+)
 
 from midas.loggers import aiogram_logger
 from midas.service.user_caching import CachedUser
 
+from midas.usecase.abstract_usecase import AbstractUsecase
 from midas.util.enums import Currency
 
 from midas.platform.telegram.keyboard import get_yes_no_keyboard
-from midas.platform.telegram.util.rendering.abstract_pager import AbstractPager
+from midas.platform.telegram.util.rendering.abstract_pager import (
+    AbstractPager,
+    PagerStatesGroup,
+)
 from midas.platform.telegram.util.menu.events import remove_menu, send_main_menu
 
 
@@ -28,13 +37,24 @@ class Pager[T: Any](AbstractPager[T], ABC):
     """
 
     @override
+    def __init__(
+        self,
+        get_usecase: AbstractUsecase,
+        delete_usecase: AbstractUsecase,
+        markup: InlineKeyboardMarkup,
+        states_group: type[PagerStatesGroup],
+    ) -> None:
+        super().__init__(get_usecase, delete_usecase, markup, states_group)
+        self._INITIAL_FETCH_COUNT = 16
+
+    @override
     async def handle_init_pagination_command(
         self, message: Message, state: FSMContext, user: CachedUser
     ) -> None:
         aiogram_logger.info(f"Received init pagination command: {self=}")
 
         current = 0
-        max_items = 16
+        max_items = self._INITIAL_FETCH_COUNT
         items: list[T] = await self.get_usecase.execute(user.id, max_items)
 
         if len(items) == 0:

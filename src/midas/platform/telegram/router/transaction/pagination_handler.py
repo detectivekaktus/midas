@@ -53,7 +53,7 @@ class TransactionPager(Pager[Transaction]):
         data = await state.get_data()
         mode: FormMode = FormMode.EDIT
         user: CachedUser = data["user"]
-        items: list[Transaction] = data["items"]  # type: ignore
+        items: list[Transaction] = data["items"]
         current: int = data["current"]
         item = items[current]
 

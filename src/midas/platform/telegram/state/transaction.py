@@ -15,4 +15,5 @@ class TransactionForm(StatesGroup):
 
 
 class TransactionPaginationState(PagerStatesGroup):
-    pass
+    show = State()
+    confirm_delete = State()

@@ -16,4 +16,5 @@ class EventForm(StatesGroup):
 
 
 class EventPaginationState(PagerStatesGroup):
-    pass
+    show = State()
+    confirm_delete = State()

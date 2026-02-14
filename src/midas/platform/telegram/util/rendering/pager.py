@@ -18,8 +18,13 @@ class Pager[T: Any](AbstractPager[T], ABC):
     Added abstraction layer above `AbstractPager`. This class contains basic
     algorithms for generic pagination routines.
 
-    Please, consider that `render()` and `handle_edit_callback_query()` methods
-    need to be overriden in the concrete pager implementation.
+    Please, consider that `render_item()`, `handle_edit_callback_query()`, and
+    `_handler_rules()` methods need to be overriden in the concrete pager
+    implementation.
+
+    Once the concrete pager is implemented, bind a router to it via instantiating
+    the class first, and then calling `register_handlers()` method by suppling
+    it with a Router object.
     """
 
     @override
@@ -39,7 +44,7 @@ class Pager[T: Any](AbstractPager[T], ABC):
 
         await remove_menu(message, state)
         await state.update_data(
-            user=user, items=items, currnet=current, max_items=max_items
+            user=user, items=items, current=current, max_items=max_items
         )
         await state.set_state(self.states_group.show)
 
@@ -64,7 +69,7 @@ class Pager[T: Any](AbstractPager[T], ABC):
             # if after refetch the initial condition is still met, there are
             # no new items to display.
             if current >= len(items):
-                await query.answer("No more transactions available.")
+                await query.answer("No more items available.")
                 return
 
             await state.update_data(max_items=max_items, items=items)

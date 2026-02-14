@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Callable
+from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import (
@@ -37,7 +38,7 @@ class AbstractPager[T: Any](ABC):
         get_usecase: AbstractUsecase,
         delete_usecase: AbstractUsecase,
         markup: InlineKeyboardMarkup,
-        states_group: PagerStatesGroup,
+        states_group: type[PagerStatesGroup],
     ) -> None:
         """
         Instantiate a new pager.
@@ -48,13 +49,35 @@ class AbstractPager[T: Any](ABC):
         :type delete_usecase: AbstractUsecase
         :param markup: telegram inline keyboard to attach to each page
         :type markup: InlineKeyboardMarkup
-        :param states_group: `StatesGroup` object defined for the exact pager.
-        :type states_group: StatesGroup
+        :param states_group: `PagerStatesGroup` type defined for the exact pager.
+        :type states_group: PagerStatesGroup
         """
         self.get_usecase = get_usecase
         self.delete_usecase = delete_usecase
         self.markup = markup
         self.states_group = states_group
+
+    @abstractmethod
+    def _handler_rules(self) -> list[Callable]:
+        """
+        Get list of handler rules to apply to the router instance.
+
+        This is an example of a rule that bounds /items command to the
+        init pagination handler. Notice that the r argument in the lambda
+        function is supposed to be a router.
+        lambda r: r.message(Command("items"))(self.handle_init_pagination_command)
+
+        This method is private and is meant to be run automatically in
+        `register_handlers()` method.
+
+        :return: list of rules
+        :rtype: list[Callable[..., Any]]
+        """
+        pass
+
+    def register_handlers(self, router: Router) -> None:
+        for rule in self._handler_rules():
+            rule(router)
 
     async def _get_message_from_query(self, query: CallbackQuery) -> Message:
         """
@@ -75,6 +98,16 @@ class AbstractPager[T: Any](ABC):
             await query.answer("If you see this message, report a bug on github.")
             raise ValueError("No message bound to query")
         return message
+
+    @abstractmethod
+    def _render_item(self, item: T, currency: Currency) -> str:
+        """
+        Render one item.
+
+        :return: rendered item.
+        :rtype: str
+        """
+        pass
 
     async def answer_query(
         self, query: CallbackQuery, item: T, currency: Currency
@@ -97,16 +130,6 @@ class AbstractPager[T: Any](ABC):
         await query.answer()
         text = self._render_item(item, currency)
         await message.edit_text(text, reply_markup=self.markup)
-
-    @abstractmethod
-    def _render_item(self, item: T, currency: Currency) -> str:
-        """
-        Render one item.
-
-        :return: rendered item.
-        :rtype: str
-        """
-        pass
 
     @abstractmethod
     async def handle_init_pagination_command(

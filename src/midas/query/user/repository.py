@@ -1,4 +1,4 @@
-from typing import Optional, override
+from typing import Optional, Sequence, override
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,3 +53,6 @@ class UserRepository(GenericRepository[User, int], EagerLoadable[User, int]):
             ).one_or_none()
 
         return await super().get_by_id(id)
+
+    async def get_all(self) -> Sequence[User]:
+        return (await self._session.scalars(select(User))).fetchall()

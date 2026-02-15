@@ -100,7 +100,7 @@ class AccountRepository(
 
         return (await self._session.scalars(stmt)).one_or_none()
 
-    async def get_all_user_accounts(
+    async def get_all_by_user_id(
         self, user_id: int, eager: bool = False
     ) -> Sequence[Account]:
         """

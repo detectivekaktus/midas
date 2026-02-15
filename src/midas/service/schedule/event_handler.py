@@ -14,17 +14,10 @@ from midas.usecase.transaction import CreateTransactionUsecase
 class EventHandler(AbstractHandler):
     @override
     def __init__(self, notifier: AbstractNotifier, update_interval: int = 600) -> None:
-        """
-        Create new event handler.
-
-        :param update_interval: seconds interval between updates
-        :type update_interval: int
-        """
+        super().__init__(notifier, update_interval)
         self._get_events = GetUpcomingEventsUsecase()
         self._update_event = UpdateEventAfterRunUsecase()
         self._create_transaction = CreateTransactionUsecase()
-        self._notifier = notifier
-        self._UPDATE_INTERVAL = update_interval
 
     def _event_to_transaction_scheme(self, event: Event) -> dict[str, Any]:
         scheme = {

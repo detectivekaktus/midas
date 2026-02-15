@@ -38,7 +38,7 @@ class GenerateReportUsecase(AbstractUsecase[dict[str, Any]]):
             report: dict[str, Any] = {}
             report["accounts"] = {}
 
-            accounts: Sequence[Account] = await self.account_repo.get_all_user_accounts(
+            accounts: Sequence[Account] = await self.account_repo.get_all_by_user_id(
                 user_id
             )
 

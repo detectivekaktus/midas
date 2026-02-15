@@ -1,4 +1,4 @@
-from typing import Optional, override
+from typing import Optional, Sequence, override
 from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -84,6 +84,7 @@ class AccountRepository(
         :type user_id: int
         :param transaction_type: transaction type that's being tracked
         by the account
+        :type transaction_type: TransactionType
         :param eager: use eager loading
         :type eager: bool
         :return: user's account or `None` if user doesn't exist
@@ -98,3 +99,23 @@ class AccountRepository(
             stmt = stmt.options(selectinload(Account.storage))
 
         return (await self._session.scalars(stmt)).one_or_none()
+
+    async def get_all_user_accounts(
+        self, user_id: int, eager: bool = False
+    ) -> Sequence[Account]:
+        """
+        SELECT all accounts where user_id = `user_id`.
+
+        :param user_id: user's telegram id
+        :type user_id: int
+        :param eager: use eager loading
+        :type eager: bool
+        :return: all accounts associated with a user or empty list if
+        `user_id` is invalid.
+        :rtype: Optional[Account]
+        """
+        stmt = select(Account).where(Account.user_id == user_id)
+        if eager:
+            stmt = stmt.options(selectinload(Account.storage))
+
+        return (await self._session.scalars(stmt)).fetchall()

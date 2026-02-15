@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, override
+from typing import Any, Sequence, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.loggers import app_logger
@@ -38,12 +38,9 @@ class GenerateReportUsecase(AbstractUsecase[dict[str, Any]]):
             report: dict[str, Any] = {}
             report["accounts"] = {}
 
-            accounts: list[Account] = [
-                await self.account_repo.get_user_account_by_transaction_type(
-                    user_id, ttype
-                )
-                for ttype in TransactionType
-            ]  # type: ignore
+            accounts: Sequence[Account] = await self.account_repo.get_all_user_accounts(
+                user_id
+            )
 
             for account in accounts:
                 ttype = TransactionType(account.transaction_type_id)

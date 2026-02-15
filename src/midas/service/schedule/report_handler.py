@@ -15,7 +15,9 @@ from midas.util.enums import Currency, TransactionType
 
 class ReportHandler(AbstractHandler):
     @override
-    def __init__(self, notifier: AbstractNotifier, update_interval: int = 600) -> None:
+    def __init__(
+        self, notifier: AbstractNotifier, update_interval: int = 3600 * 24
+    ) -> None:
         super().__init__(notifier, update_interval)
         self._generate_report = GenerateReportUsecase()
         self._get_users = GetAllUsersUsecase()

@@ -35,9 +35,7 @@ class GenerateReportUsecase(AbstractUsecase[dict[str, Any]]):
         app_logger.debug(f"Started `GenerateReportUsecase` execution: {user_id}")
 
         async with self._session:
-            report: dict[str, Any] = {}
-            report["accounts"] = {}
-
+            report: dict[str, Any] = {"accounts": {}, "result": Decimal()}
             accounts: Sequence[Account] = await self.account_repo.get_all_by_user_id(
                 user_id
             )

@@ -9,12 +9,12 @@ notifier = TelegramNotifier(bot)
 
 
 async def start_event_handling() -> None:
-    handler = EventHandler(notifier, 3600)
+    handler = EventHandler(notifier)
     create_task(handler.loop())
 
 
 async def start_monthly_reporting() -> None:
-    handler = ReportHandler(notifier, 3600 * 12)
+    handler = ReportHandler(notifier)
     create_task(handler.loop())
 
 

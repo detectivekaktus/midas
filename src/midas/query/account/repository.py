@@ -112,7 +112,7 @@ class AccountRepository(
         :type eager: bool
         :return: all accounts associated with a user or empty list if
         `user_id` is invalid.
-        :rtype: Optional[Account]
+        :rtype: Sequence[Account]
         """
         stmt = select(Account).where(Account.user_id == user_id)
         if eager:

@@ -47,19 +47,15 @@ class GenerateReportUsecase(AbstractUsecase[dict[str, Any]]):
 
             for account in accounts:
                 ttype = TransactionType(account.transaction_type_id)
-                balance = (
-                    (account.debit_amount - account.credit_amount)
-                    if ttype == TransactionType.INCOME
-                    else account.credit_amount - account.debit_amount
-                )
+                balance = account.debit_amount - account.credit_amount
 
                 if ttype == TransactionType.INCOME:
                     report["result"] = balance
                 report["accounts"][ttype.name.lower()] = balance
 
                 if clear_accounts:
-                    account.debit_amount = Decimal("0")
-                    account.credit_amount = Decimal("0")
+                    account.debit_amount = Decimal()
+                    account.credit_amount = Decimal()
 
             await self._session.commit()
 

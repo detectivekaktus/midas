@@ -38,5 +38,9 @@
     {
         "name": "Other expenses",
         "income": false
+    },
+    {
+        "name": "Saving",
+        "income": false
     }
 ]

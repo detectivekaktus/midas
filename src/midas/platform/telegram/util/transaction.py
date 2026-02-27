@@ -22,5 +22,6 @@ def get_transaction_type_list() -> list[str]:
         TransactionType.HEALTHCARE: "🧑‍⚕️",
         TransactionType.TRAVEL: "✈️",
         TransactionType.OTHER: "👾",
+        TransactionType.SAVING: "💰",
     }
     return [f"{type_map[type_]} {type_.readable()}" for type_ in TransactionType]

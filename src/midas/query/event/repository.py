@@ -38,7 +38,7 @@ class EventRepository(GenericRepository[Event, int], Purgeable, RetrievableByUse
         """
         return (
             await self._session.scalars(
-                select(Event).where(Event.user_id == user_id).order_by(Event.id)
+                select(Event).where(Event.user_id == user_id).order_by(Event.id.desc())
             )
         ).fetchmany(count)
 

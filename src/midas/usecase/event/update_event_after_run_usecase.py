@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from typing import override
+from typing import Union, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.loggers import app_logger
@@ -22,20 +22,29 @@ class UpdateEventAfterRunUsecase(AbstractUsecase[None]):
         super().__init__(session)
         self._event_repo = EventRepository(self._session)
 
-    # TODO: add method overloading which would expect event id, instead
-    # of event object
     @override
-    async def execute(self, event: Event) -> None:
+    async def execute(self, arg: Union[int, Event]) -> None:
         """
         Set event's `last_run_on` field to today and increment `next_run_on`
         based on the `interval`.
 
-        :param event: event to be updated
-        :type event: Event
+        :param arg: event id or `Event` instance.
+        :type arg: Union[int, Event]
+        :raise ValueError: if `arg` is a non-existing event id.
         """
         app_logger.debug("Started `UpdateEventAfterRunUsecase` execution")
 
         async with self._session:
+            if isinstance(arg, Event):
+                event = arg
+                id = event.id
+            else:
+                event = await self._event_repo.get_by_id(arg)
+                id = arg
+
+            if event is None:
+                raise ValueError(f"No event with {id=} exists")
+
             today = date.today()
             delta = determine_timedelta(EventFrequency(event.interval))
             event.last_run_on = today

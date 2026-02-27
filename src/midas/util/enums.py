@@ -34,6 +34,7 @@ class TransactionType(IntEnum):
     HEALTHCARE = 8
     TRAVEL = 9
     OTHER = 10
+    SAVING = 11
 
     def readable(self) -> str:
         """

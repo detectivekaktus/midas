@@ -59,7 +59,7 @@ async def test_create_expense_event_and_delete_it(
     events = await test_get_events.execute(user_id)
     assert len(events) == 1
 
-    await test_delete_event.execute(events[0].id)
+    await test_delete_event.execute(events[0])
     events = await test_get_events.execute(user_id)
 
     assert len(events) == 0

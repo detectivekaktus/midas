@@ -28,7 +28,6 @@ class User(Base):
     transactions = relationship("Transaction", back_populates="user")
     storages = relationship("Storage", back_populates="user")
     events = relationship("Event", back_populates="user")
-    goals = relationship("Goal", back_populates="user")
 
     def __repr__(self) -> str:
         return f"User({self.id=!r}, {self.currency_id=!r})"

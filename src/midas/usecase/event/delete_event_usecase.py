@@ -1,6 +1,7 @@
-from typing import override
+from typing import Union, override
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from midas.db.schemas.event import Event
 from midas.query.event import EventRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
 
@@ -16,20 +17,24 @@ class DeleteEventUsecase(AbstractUsecase[None]):
         super().__init__(session)
         self._event_repo = EventRepository(self._session)
 
-    # TODO: add method overloading allowing to pass directly an `Event` object
-    # instead of referencing its id and making a useless fetch
     @override
-    async def execute(self, id: int) -> None:
+    async def execute(self, arg: Union[int, Event]) -> None:
         """
         Delete an event. Note that this method does not delete any
         transactions created while this event was active.
 
-        :param id: event id
-        :type id: int
+        :param arg: event id or `Event` instance
+        :type arg: Union[int, Event]
         :raises ValueError: if no event with `id` exists.
         """
         async with self._session:
-            event = await self._event_repo.get_by_id(id)
+            if isinstance(arg, Event):
+                event = arg
+                id = event.id
+            else:
+                id = arg
+                event = await self._event_repo.get_by_id(id)
+
             if event is None:
                 raise ValueError(f"No event with {id=} exists")
 

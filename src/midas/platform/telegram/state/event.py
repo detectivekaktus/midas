@@ -1,5 +1,7 @@
 from aiogram.fsm.state import State, StatesGroup
 
+from midas.platform.telegram.util.rendering import PagerStatesGroup
+
 
 class EventForm(StatesGroup):
     """
@@ -13,6 +15,6 @@ class EventForm(StatesGroup):
     frequency = State()
 
 
-class EventPaginationState(StatesGroup):
+class EventPaginationState(PagerStatesGroup):
     show = State()
     confirm_delete = State()

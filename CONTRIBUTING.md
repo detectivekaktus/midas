@@ -1,12 +1,12 @@
-Here's a comprehensive guideline for future commits made by me and eventually anyone who would like to partecipate in the project.
+Here's a comprehensive guideline for future commits made by me and eventually anyone who would like to participate in the project.
 
 ## Changes
-1. Make small and resonable changes. It's very dirty making large changes, especially if they are not directly related one to another.
+1. Make small and reasonable changes. It's very dirty making large changes, especially if they are not directly related one to another.
 2. Use `git rebase --interactive` on your branches before pushing to slice your changes into smaller pieces.
 3. **DO NOT USE AI TO GENERATE ANY CODE!!!** Autocompletions are fine.
-4. Document the changes to the API or else find yourself in debuging something you have no clue about.
+4. Document the changes to the API or else find yourself in debugging something you have no clue about.
 5. Write tests for new features.
-5. Run tests before pushing anything that is not docs, ci or chore related.
+6. Run tests before pushing anything that is not docs, ci or chore related.
 
 ## Git
 Use conventional commits notation.

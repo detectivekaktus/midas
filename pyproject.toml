@@ -1,6 +1,6 @@
 [project]
 name = "midas"
-version = "0.2.0"
+version = "0.2.1"
 description = "Financial tracker on Telegram"
 authors = [
     {name = "Artiom Astashonak",email = "artiomastashonak@gmail.com"}

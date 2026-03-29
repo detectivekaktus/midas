@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.db.schemas.account import Account
+from midas.db.schemas.user import User
 from midas.query.interface.eager_loadable import EagerLoadable
 from midas.query.interface.purgeable import Purgeable
 from midas.query import GenericRepository
@@ -54,7 +55,7 @@ class AccountRepository(
                 await self._session.scalars(
                     select(Account)
                     .where(Account.id == id)
-                    .options(selectinload(Account.storage))
+                    .options(selectinload(Account.user))
                 )
             ).one_or_none()
 
@@ -96,7 +97,7 @@ class AccountRepository(
             .where(Account.transaction_type_id == transaction_type)
         )
         if eager:
-            stmt = stmt.options(selectinload(Account.storage))
+            stmt = stmt.options(selectinload(Account.user))
 
         return (await self._session.scalars(stmt)).one_or_none()
 
@@ -116,6 +117,6 @@ class AccountRepository(
         """
         stmt = select(Account).where(Account.user_id == user_id)
         if eager:
-            stmt = stmt.options(selectinload(Account.storage))
+            stmt = stmt.options(selectinload(Account.user))
 
         return (await self._session.scalars(stmt)).fetchall()

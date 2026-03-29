@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from midas.loggers import app_logger
 
 from midas.db.schemas.account import Account
-from midas.db.schemas.storage import Storage
 from midas.db.schemas.transaction import Transaction
+from midas.db.schemas.user import User
 from midas.query.account import AccountRepository
 from midas.query.transaction import TransactionRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
@@ -82,13 +82,14 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         """
         transaction.transaction_type_id = new_transaction_type
 
+        user: User = transaction.user
+
         income_account: Account = transaction.debit_account
         income_account.debit_amount -= transaction.amount
         income_account.credit_amount += transaction.amount
 
         # 0 -> x -> -x
-        storage: Storage = income_account.storage
-        storage.amount -= transaction.amount * 2
+        user.balance -= transaction.amount * 2
 
         expense_account: Account = (
             await self._account_repo.get_user_account_by_transaction_type(
@@ -159,13 +160,14 @@ class EditTransactionUsecase(AbstractUsecase[None]):
         expense_account: Account = transaction.debit_account
         expense_account.debit_amount -= transaction.amount
 
+        user: User = transaction.user
+
         income_account: Account = transaction.credit_account
         income_account.credit_amount -= transaction.amount
         income_account.debit_amount += transaction.amount
 
         # 0 -> -x -> x
-        storage: Storage = income_account.storage
-        storage.amount += transaction.amount * 2
+        user.balance += transaction.amount * 2
 
         transaction.debit_account = income_account
         transaction.credit_account = None
@@ -173,18 +175,17 @@ class EditTransactionUsecase(AbstractUsecase[None]):
     def _change_amount(self, transaction: Transaction, new_amount: Decimal) -> None:
         diff = transaction.amount - new_amount
 
+        user: User = transaction.user
         debit_account: Account = transaction.debit_account
         debit_account.debit_amount -= diff
 
         if transaction.transaction_type_id == TransactionType.INCOME:
-            storage: Storage = debit_account.storage
-            storage.amount -= diff
+            user.balance -= diff
         else:
             credit_account: Account = transaction.credit_account
             credit_account.credit_amount -= diff
 
-            storage: Storage = credit_account.storage
-            storage.amount += diff
+            user.balance += diff
 
         transaction.amount -= diff
 

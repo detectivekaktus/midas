@@ -1,5 +1,7 @@
-from sqlalchemy import ForeignKey
+from decimal import Decimal
+from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from midas.db import Base
 
 
@@ -13,6 +15,7 @@ class User(Base):
     id:                 int primary key
     currency_id:        int not null
     send_notifications: bool not null default true
+    balance:            Numeric(12, 2) not null default 0
     """
 
     __tablename__ = "users"
@@ -22,12 +25,14 @@ class User(Base):
         ForeignKey("currencies.id"), nullable=False
     )
     send_notifications: Mapped[bool] = mapped_column(nullable=False, default=True)
+    balance: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2), nullable=False, default=Decimal()
+    )
 
     currency = relationship("Currency", back_populates="users")
     accounts = relationship("Account", back_populates="user")
     transactions = relationship("Transaction", back_populates="user")
-    storages = relationship("Storage", back_populates="user")
     events = relationship("Event", back_populates="user")
 
     def __repr__(self) -> str:
-        return f"User({self.id=!r}, {self.currency_id=!r})"
+        return f"User({self.id=!r}, {self.currency_id=!r}, {self.send_notifications=!r}, {self.balance=!r})"

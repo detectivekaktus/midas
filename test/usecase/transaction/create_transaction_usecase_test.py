@@ -2,7 +2,6 @@ from decimal import Decimal
 from pytest import mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from midas.db.schemas.storage import Storage
 from midas.db.schemas.account import Account
 from midas.query.user import UserRepository
 from midas.query.transaction import TransactionRepository
@@ -46,9 +45,7 @@ async def test_create_income_transaction_without_description(
         credit_account = transaction.credit_account
         assert credit_account is None
 
-        storage: Storage = debit_account.storage
-        assert storage is not None
-        assert storage.amount == transaction_data["amount"]
+        assert user.balance == transaction_data["amount"]
 
 
 @mark.asyncio
@@ -90,9 +87,7 @@ async def test_create_income_transaction_with_description(
         credit_account = transaction.credit_account
         assert credit_account is None
 
-        storage: Storage = debit_account.storage
-        assert storage is not None
-        assert storage.amount == transaction_data["amount"]
+        assert user.balance == transaction_data["amount"]
 
 
 @mark.asyncio
@@ -141,7 +136,7 @@ async def test_create_multiple_transactions(
     user_repo = UserRepository(session)
     transaction_repo = TransactionRepository(session)
     async with session:
-        user = await user_repo.get_by_id(user_id, eager=True)
+        user = await user_repo.get_by_id(user_id)
         assert user is not None
 
         income_account_amount = Decimal("0")
@@ -172,6 +167,4 @@ async def test_create_multiple_transactions(
                 assert debit_account.debit_amount == transactions[i]["amount"]
                 assert credit_account is not None
 
-        storage = user.storages[0]
-        assert storage is not None
-        assert storage.amount == income_account_amount
+        assert user.balance == income_account_amount

@@ -2,10 +2,10 @@ from typing import override
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from midas.db.schemas.user import User
 from midas.loggers import app_logger
 
 from midas.db.schemas.account import Account
-from midas.db.schemas.storage import Storage
 from midas.query.transaction import TransactionRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
 from midas.util.enums import TransactionType
@@ -30,8 +30,7 @@ class DeleteTransactionUsecase(AbstractUsecase[None]):
         """
         Delete transaction by its id.
 
-        This method affects debit and credit accounts as well as storages
-        associated with them.
+        This method affects debit and credit accounts.
 
         :param id: transaction id
         :type id: UUID
@@ -45,19 +44,15 @@ class DeleteTransactionUsecase(AbstractUsecase[None]):
 
             debit_account: Account = transaction.debit_account
             credit_account: Account = transaction.credit_account
-            storage: Storage = (
-                debit_account.storage
-                if transaction.transaction_type_id == TransactionType.INCOME
-                else credit_account.storage
-            )
+            user: User = transaction.user
 
             if transaction.transaction_type_id == TransactionType.INCOME:
                 debit_account.debit_amount -= transaction.amount
-                storage.amount -= transaction.amount
+                user.balance -= transaction.amount
             else:
                 debit_account.debit_amount -= transaction.amount
                 credit_account.credit_amount -= transaction.amount
-                storage.amount += transaction.amount
+                user.balance += transaction.amount
 
             await self._transaction_repo.delete_by_id(id)
             await self._session.commit()

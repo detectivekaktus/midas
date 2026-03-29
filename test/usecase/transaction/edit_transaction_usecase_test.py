@@ -3,7 +3,7 @@ from pytest import fixture, mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.db.schemas.account import Account
-from midas.db.schemas.storage import Storage
+from midas.db.schemas.user import User
 from midas.query.account import AccountRepository
 from midas.usecase.transaction import EditTransactionUsecase
 from midas.util.enums import Currency, TransactionType
@@ -21,6 +21,7 @@ def test_edit_transaction(test_engine) -> EditTransactionUsecase:
 async def test_add_one_transaction_and_edit_it(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_edit_transaction,
@@ -65,15 +66,15 @@ async def test_add_one_transaction_and_edit_it(
         assert income_account.debit_amount == Decimal("1000")
         assert income_account.credit_amount == Decimal()
 
-        storage: Storage = income_account.storage
-        assert storage is not None
-        assert storage.amount == Decimal("1000")
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal("1000")
 
 
 @mark.asyncio
 async def test_edit_income_and_expense(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_edit_transaction,
@@ -118,9 +119,8 @@ async def test_edit_income_and_expense(
         assert income_account.debit_amount == Decimal("1000")
         assert income_account.credit_amount == Decimal()
 
-        storage: Storage = income_account.storage
-        assert storage is not None
-        assert storage.amount == Decimal("1000")
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal("1000")
 
     transaction_data = {
         "user_id": user_id,
@@ -153,9 +153,8 @@ async def test_edit_income_and_expense(
         assert income_account.debit_amount == Decimal("1000")
         assert income_account.credit_amount == Decimal("250")
 
-        storage: Storage = income_account.storage
-        assert storage is not None
-        assert storage.amount == Decimal("750")
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal("750")
 
 
 @mark.asyncio
@@ -218,6 +217,7 @@ async def test_pass_same_arguments(
 async def test_change_income_to_expense(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_edit_transaction,
@@ -269,14 +269,15 @@ async def test_change_income_to_expense(
         assert new_transaction.debit_account_id == entertainment_account.id
         assert new_transaction.credit_account_id == income_account.id
 
-        storage: Storage = income_account.storage
-        assert storage.amount == Decimal("-100")
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal("-100")
 
 
 @mark.asyncio
 async def test_change_expense_to_expense(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_edit_transaction,
@@ -333,14 +334,15 @@ async def test_change_expense_to_expense(
         assert new_transaction.debit_account_id == groceries_account.id
         assert new_transaction.credit_account_id == income_account.id
 
-        storage: Storage = income_account.storage
-        assert storage.amount == Decimal("-100")
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal("-100")
 
 
 @mark.asyncio
 async def test_change_expense_to_income(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_edit_transaction,
@@ -392,5 +394,5 @@ async def test_change_expense_to_income(
         assert new_transaction.debit_account_id == income_account.id
         assert new_transaction.credit_account_id is None
 
-        storage: Storage = income_account.storage
-        assert storage.amount == Decimal("100")
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal("100")

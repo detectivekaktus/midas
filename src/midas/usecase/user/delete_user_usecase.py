@@ -5,7 +5,6 @@ from midas.loggers import app_logger
 
 from midas.query.account import AccountRepository
 from midas.query.event import EventRepository
-from midas.query.storage import StorageRepository
 from midas.query.transaction import TransactionRepository
 from midas.query.user import UserRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
@@ -22,7 +21,6 @@ class DeleteUserUsecase(AbstractUsecase[None]):
         super().__init__(session)
         self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
-        self._storage_repo = StorageRepository(self._session)
         self._transaction_repo = TransactionRepository(self._session)
         self._event_repo = EventRepository(self._session)
 
@@ -33,7 +31,6 @@ class DeleteUserUsecase(AbstractUsecase[None]):
 
         What's the subject of being purged:
         * Transactions
-        * Storages
         * Accounts
         * Events
 
@@ -55,7 +52,6 @@ class DeleteUserUsecase(AbstractUsecase[None]):
                 raise ValueError(f"No user with {user_id=} exists")
 
             await self._transaction_repo.purge_by_user_id(user_id)
-            await self._storage_repo.purge_by_user_id(user_id)
             await self._account_repo.purge_by_user_id(user_id)
             await self._event_repo.purge_by_user_id(user_id)
             await self._user_repo.delete_by_id(user_id)

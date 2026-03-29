@@ -39,9 +39,9 @@ class TransactionPager(Pager[Transaction]):
 
         text = (
             f"📅 {creation_date}{html.italic(" - Edited") if item.updated_at is not None else ""}\n"
-            f"📌 {item.title}\n"
+            f"📌 {html.quote(item.title)}\n"
             f"💳 {type_}\n"
-            f"📝 {description if description else html.italic("No description provided")}\n"
+            f"📝 {html.quote(description) if description else html.italic("No description provided")}\n"
             f"💰 {currency.name} {item.amount}"
         )
         return text

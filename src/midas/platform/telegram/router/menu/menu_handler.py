@@ -4,7 +4,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from midas.service.user_caching import CachedUser
-from midas.usecase.storage import GetUserStorageUsecase
+
+from midas.db.schemas.user import User
+from midas.usecase.user import GetUserUsecase
 from midas.util.enums import Currency
 
 from midas.platform.telegram.state.menu import MenuState
@@ -46,11 +48,11 @@ async def handle_events_menu(message: Message, state: FSMContext) -> None:
 async def handle_balance_command(
     message: Message, state: FSMContext, user: CachedUser
 ) -> None:
-    usecase = GetUserStorageUsecase()
-    storage = await usecase.execute(user.id)
+    usecase = GetUserUsecase()
+    db_user: User = await usecase.execute(user.id)  # type: ignore
 
     currency = Currency(user.currency_id).name
-    text = f"🏦 Your current balance: {currency} {storage.amount}"
+    text = f"🏦 Your current balance: {currency} {db_user.balance}"
     await send_main_menu(message, state, text=text)
 
 

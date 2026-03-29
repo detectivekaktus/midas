@@ -3,7 +3,6 @@ from pytest import fixture, mark, raises
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.query.account import AccountRepository
-from midas.query.storage import StorageRepository
 from midas.query.transaction import TransactionRepository
 from midas.query.user import UserRepository
 from midas.usecase.transaction import CreateTransactionUsecase
@@ -37,7 +36,6 @@ async def test_register_user_and_delete_their_profile_and_data(
     session = AsyncSession(test_engine)
     user_repo = UserRepository(session)
     account_repo = AccountRepository(session)
-    storage_repo = StorageRepository(session)
 
     async with session:
         user = await user_repo.get_by_id(user_id)
@@ -46,9 +44,6 @@ async def test_register_user_and_delete_their_profile_and_data(
         for i in TransactionType:
             account = await account_repo.get_by_id(i)
             assert account is None
-
-        storage = await storage_repo.get_by_id(1)
-        assert storage is None
 
 
 @mark.asyncio
@@ -117,7 +112,6 @@ async def test_delete_user_with_transactions(
     session = AsyncSession(test_engine)
     user_repo = UserRepository(session)
     account_repo = AccountRepository(session)
-    storage_repo = StorageRepository(session)
     transaction_repo = TransactionRepository(session)
     async with session:
         user = await user_repo.get_by_id(user_id)
@@ -126,9 +120,6 @@ async def test_delete_user_with_transactions(
         for i in TransactionType:
             account = await account_repo.get_by_id(i)
             assert account is None
-
-        storage = await storage_repo.get_by_id(1)
-        assert storage is None
 
         transactions = await transaction_repo.get_recent(user_id, eager=True)
         assert len(transactions) == 0

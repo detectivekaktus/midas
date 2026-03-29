@@ -57,10 +57,10 @@ class TransactionRepository(
                     .where(Transaction.id == id)
                     .options(
                         selectinload(Transaction.debit_account).selectinload(
-                            Account.storage
+                            Account.user
                         ),
                         selectinload(Transaction.credit_account).selectinload(
-                            Account.storage
+                            Account.user
                         ),
                     )
                 )
@@ -106,7 +106,7 @@ class TransactionRepository(
         )
         if eager:
             stmt = stmt.options(
-                selectinload(Transaction.debit_account).selectinload(Account.storage),
+                selectinload(Transaction.debit_account).selectinload(Account.user),
                 selectinload(Transaction.credit_account),
             )
 

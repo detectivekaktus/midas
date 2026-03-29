@@ -2,9 +2,8 @@ from decimal import Decimal
 from pytest import fixture, mark
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from midas.db.schemas.storage import Storage
+from midas.db.schemas.user import User
 from midas.query.account.repository import AccountRepository
-from midas.query.storage.repository import StorageRepository
 from midas.usecase.transaction import DeleteTransactionUsecase
 from midas.util.enums import Currency, TransactionType
 
@@ -20,6 +19,7 @@ def test_delete_transaction(test_engine) -> DeleteTransactionUsecase:
 async def test_create_income_transaction_and_delete_it(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_delete_transaction,
@@ -52,15 +52,15 @@ async def test_create_income_transaction_and_delete_it(
         assert income_account.debit_amount == Decimal()
         assert income_account.credit_amount == Decimal()
 
-        storage: Storage = income_account.storage
-        assert storage is not None
-        assert storage.amount == Decimal()
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal()
 
 
 @mark.asyncio
 async def test_add_4_transactions_and_delete_them(
     test_engine,
     test_register_usecase,
+    test_get_usecase,
     test_create_transaction,
     test_get_transactions,
     test_delete_transaction,
@@ -112,7 +112,6 @@ async def test_add_4_transactions_and_delete_them(
 
     session = AsyncSession(test_engine)
     account_repo = AccountRepository(session=session)
-    storage_repo = StorageRepository(session=session)
     async with session:
         for type_ in TransactionType:
             account = await account_repo.get_user_account_by_transaction_type(
@@ -123,7 +122,5 @@ async def test_add_4_transactions_and_delete_them(
             assert account.debit_amount == Decimal()
             assert account.credit_amount == Decimal()
 
-        storage = await storage_repo.get_by_id(1)
-
-        assert storage is not None
-        assert storage.amount == Decimal()
+        user: User = await test_get_usecase.execute(user_id)
+        assert user.balance == Decimal()

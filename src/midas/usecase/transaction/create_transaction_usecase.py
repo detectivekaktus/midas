@@ -4,11 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from midas.loggers import app_logger
 
-from midas.db.schemas.storage import Storage
 from midas.db.schemas.account import Account
 from midas.db.schemas.transaction import Transaction
 from midas.query.account import AccountRepository
-from midas.query.storage import StorageRepository
 from midas.query.transaction import TransactionRepository
 from midas.query.user import UserRepository
 from midas.usecase.abstract_usecase import AbstractUsecase
@@ -18,8 +16,7 @@ from midas.util.enums import TransactionType
 class CreateTransactionUsecase(AbstractUsecase[None]):
     """
     Create transaction usecase class. This class is responsible for
-    creating new transactions and their side effects, such as account
-    and storage amounts.
+    creating new transactions and their side effect.
     """
 
     @override
@@ -28,7 +25,6 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         self._transaction_repo = TransactionRepository(self._session)
         self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
-        self._storage_repo = StorageRepository(self._session)
 
     @override
     async def execute(
@@ -40,8 +36,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
         description: Optional[str] = None,
     ) -> None:
         """
-        Create a new transaction, update accounts debit and credit values and update
-        user storage associated with the income account.
+        Create a new transaction, update accounts debit and credit values.
 
         :param user_id: user's telegram id
         :type user_id: int
@@ -75,7 +70,6 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
             if transaction_type == TransactionType.INCOME:
                 debit_account = income_account
                 credit_account = None
-                storage: Storage = debit_account.storage
 
                 # +-------------+--------+--------+
                 # | Account     | Debit  | Credit |
@@ -84,7 +78,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                 # | Income debt |        | amount |
                 # +-------------+--------+--------+
                 debit_account.debit_amount += amount
-                storage.amount += amount
+                user.balance += amount
             else:
                 # same here
                 debit_account: Account = (
@@ -93,7 +87,6 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
                     )
                 )  # type: ignore
                 credit_account = income_account
-                storage: Storage = credit_account.storage
 
                 # +-------------+--------+--------+
                 # | Account     | Debit  | Credit |
@@ -104,7 +97,7 @@ class CreateTransactionUsecase(AbstractUsecase[None]):
 
                 debit_account.debit_amount += amount
                 credit_account.credit_amount += amount
-                storage.amount -= amount
+                user.balance -= amount
 
             transaction = Transaction(
                 user_id=user_id,

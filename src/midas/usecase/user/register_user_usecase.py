@@ -5,10 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from midas.loggers import app_logger
 
 from midas.query.account import AccountRepository
-from midas.query.storage import StorageRepository
 from midas.query.user import UserRepository
 from midas.db.schemas.account import Account
-from midas.db.schemas.storage import Storage
 from midas.db.schemas.user import User
 from midas.usecase.abstract_usecase import AbstractUsecase
 from midas.util.enums import Currency, TransactionType
@@ -31,7 +29,6 @@ class RegisterUserUsecase(AbstractUsecase[None]):
         super().__init__(session)
         self._user_repo = UserRepository(self._session)
         self._account_repo = AccountRepository(self._session)
-        self._storage_repo = StorageRepository(self._session)
 
     @override
     async def execute(self, user_id: int, currency: Currency) -> None:
@@ -40,8 +37,7 @@ class RegisterUserUsecase(AbstractUsecase[None]):
 
         This method creates a new row inside `users` table for the current
         user. Also, all users have one associated account per each
-        `TransactionType`. In the end, `TransactionType.INCOME` account is
-        related to a new storage for the newly created user.
+        `TransactionType`.
 
         :param user_id: user's telegram id.
         :type user_id: int
@@ -69,14 +65,6 @@ class RegisterUserUsecase(AbstractUsecase[None]):
             ]
             self._account_repo.add_many(accounts)
             await self._account_repo.flush()
-
-            income_account = next(
-                acc
-                for acc in accounts
-                if acc.transaction_type_id == TransactionType.INCOME
-            )
-            storage = Storage(user_id=user_id, account_id=income_account.id)
-            self._storage_repo.add(storage)
 
             await self._session.commit()
 

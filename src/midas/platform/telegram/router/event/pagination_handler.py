@@ -39,9 +39,9 @@ class EventPager(Pager[Event]):
             f"{html.bold("EVENT")}\n"
             f"Last time occured on {last_run_date}\n"
             f"Runs {html.italic(frequency)}\n"
-            f"📌 {item.title}\n"
+            f"📌 {html.quote(item.title)}\n"
             f"💳 {type_}\n"
-            f"📝 {description if description else html.italic("No description provided")}\n"
+            f"📝 {html.quote(description) if description else html.italic("No description provided")}\n"
             f"💰 {currency.name} {item.amount}"
         )
         return text

@@ -1,6 +1,6 @@
 from decimal import Decimal
 from typing import Optional
-from aiogram import F, Router
+from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
@@ -109,7 +109,7 @@ async def handle_valid_type(
 
         event: Event = await state.get_value("event")  # type: ignore
         await message.answer(
-            f"Enter new event title. (current: {event.title})",
+            f"Enter new event title. (current: {html.quote(event.title)})",
             reply_markup=get_skip_keyboard(),
         )
 
@@ -140,7 +140,7 @@ async def handle_valid_title(message: Message, state: FSMContext) -> None:
 
         event: Event = await state.get_value("event")  # type: ignore
         await message.answer(
-            f"Add new description. (current: {event.description})",
+            f"Add new description. (current: {html.quote(event.description)})",
             reply_markup=get_skip_keyboard(),
         )
 

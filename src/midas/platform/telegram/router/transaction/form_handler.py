@@ -1,6 +1,6 @@
 from decimal import Decimal
-from typing import Any, Optional
-from aiogram import F, Router
+from typing import Optional
+from aiogram import F, Router, html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
@@ -107,7 +107,7 @@ async def handle_valid_type(
 
         transaction: Transaction = await state.get_value("transaction")  # type: ignore
         await message.answer(
-            f"Enter new transaction title. (current: {transaction.title})",
+            f"Enter new transaction title. (current: {html.quote(transaction.title)})",
             reply_markup=get_skip_keyboard(),
         )
 
@@ -138,7 +138,7 @@ async def handle_valid_title(message: Message, state: FSMContext) -> None:
 
         transaction: Transaction = await state.get_value("transaction")  # type: ignore
         await message.answer(
-            f"Add new description. (current: {transaction.description})",
+            f"Add new description. (current: {html.quote(transaction.description)})",
             reply_markup=get_skip_keyboard(),
         )
 

@@ -14,14 +14,14 @@ files = [
 
 [[package]]
 name = "aiogram"
-version = "3.27.0"
+version = "3.28.2"
 description = "Modern and fully asynchronous framework for Telegram Bot API"
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
 files = [
-    {file = "aiogram-3.27.0-py3-none-any.whl", hash = "sha256:26a091b6266d87db514e02703072035e7c17feebef480f927083bcfb22f634a3"},
-    {file = "aiogram-3.27.0.tar.gz", hash = "sha256:ed5fd6b40d80a6cdb215ab162c9bd9d9b7892fb2710b45e3b762a98c21119297"},
+    {file = "aiogram-3.28.2-py3-none-any.whl", hash = "sha256:8a90cdf75a64ba629468f73b6e999662943fff39db213bb406afe114a3e8c0f2"},
+    {file = "aiogram-3.28.2.tar.gz", hash = "sha256:140913a569516811c4ce576a292491024c8d8a739c47150d64a05aa4adc35310"},
 ]
 
 [package.dependencies]
@@ -29,7 +29,7 @@ aiofiles = ">=23.2.1,<26.0"
 aiohttp = ">=3.9.0,<3.14"
 certifi = ">=2023.7.22"
 magic-filter = ">=1.0.12,<1.1"
-pydantic = ">=2.4.1,<2.13"
+pydantic = ">=2.4.1,<2.14"
 typing-extensions = ">=4.7.0,<=5.0"
 
 [package.extras]
@@ -37,7 +37,7 @@ cli = ["aiogram-cli (>=1.1.0,<2.0.0)"]
 docs = ["furo (>=2024.8.6,<2024.9.0)", "markdown-include (>=0.8.1,<0.9.0)", "pygments (>=2.18.0,<2.19.0)", "pymdown-extensions (>=10.3,<11.0)", "sphinx (>=8.0.2,<8.1.0)", "sphinx-autobuild (>=2024.9.3,<2024.10.0)", "sphinx-copybutton (>=0.5.2,<0.6.0)", "sphinx-intl (>=2.2.0,<2.3.0)", "sphinx-substitution-extensions (>=2024.8.6,<2024.9.0)", "sphinxcontrib-towncrier (>=0.4.0a0,<0.5.0)", "towncrier (>=24.8.0,<24.9.0)"]
 fast = ["aiodns (>=3.0.0)", "uvloop (>=0.17.0) ; (sys_platform == \"darwin\" or sys_platform == \"linux\") and platform_python_implementation != \"PyPy\" and python_version < \"3.13\"", "uvloop (>=0.21.0) ; (sys_platform == \"darwin\" or sys_platform == \"linux\") and platform_python_implementation != \"PyPy\" and python_version >= \"3.13\""]
 i18n = ["babel (>=2.13.0,<3)"]
-mongo = ["motor (>=3.3.2,<3.8)", "pymongo (>4.5,<4.16)"]
+mongo = ["motor (>=3.3.2,<3.8)", "pymongo (>4.5,<4.17)"]
 proxy = ["aiohttp-socks (>=0.10.1,<0.11.0)"]
 redis = ["redis[hiredis] (>=6.2.0,<8)"]
 signature = ["cryptography (>=46.0.0)"]
@@ -1771,4 +1771,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13.7,<3.15"
-content-hash = "2a9250c289a0b7441a8d37edb0af32ad71f8a7ce9959ca6b2d6158c7df0878a1"
+content-hash = "64f4d6028a5665d0e4aa0817cadb6a68dbe1610711f2901cb07b3c054dbaf881"
